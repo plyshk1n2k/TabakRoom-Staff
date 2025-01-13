@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:tabakroom_staff/screens/home_screen.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
+import 'package:tabakroom_staff/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,36 +13,59 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool _isPasswordVisible = false; // Переменная для показа/скрытия пароля
-  bool get _isDarkMode {
-    return Theme.of(context).brightness == Brightness.dark;
-  }
+  bool _isPasswordVisible = false;
+  bool _isLoading = false;
+  bool _formCompleted = false;
 
   final TextEditingController _loginController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isLoading = false; // 👉 Флаг загрузки
 
-  // Метод для имитации авторизации
+  bool get _isDarkMode => Theme.of(context).brightness == Brightness.dark;
+
   Future<void> _login() async {
     setState(() {
-      _isLoading = true; // 👉 Включаем спиннер
+      _isLoading = true;
     });
 
-    await Future.delayed(const Duration(seconds: 2)); // ⏳ Имитация запроса
+    try {
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:8000/api/token/'),
+        body: {
+          'username': _loginController.text,
+          'password': _passwordController.text,
+        },
+      );
 
-    setState(() {
-      _isLoading = false; // ❌ Выключаем спиннер
-    });
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        await AuthService.saveToken(data['access']);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+        _showSnackBar("Успешная авторизация!", success: true);
+      } else {
+        _showSnackBar("Ошибка авторизации!", success: false);
+      }
+    } catch (e) {
+      _showSnackBar("Произошла ошибка: $e", success: false);
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
-    // 🟢 Здесь логика обработки ответа
+  void _showSnackBar(String message, {required bool success}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          "Успешная авторизация!",
+          message,
           style: Theme.of(context).textTheme.headlineLarge,
         ),
-        backgroundColor:
-            _isDarkMode ? AppColors.secondaryForDark : AppColors.secondary,
+        backgroundColor: success
+            ? (_isDarkMode ? AppColors.secondaryForDark : AppColors.secondary)
+            : (_isDarkMode ? AppColors.dangerForDark : AppColors.danger),
       ),
     );
   }
@@ -50,97 +77,80 @@ class _LoginScreenState extends State<LoginScreen> {
         title: const Text('Авторизация'),
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // 🔥 Логотип или изображение
-              Padding(
-                padding: const EdgeInsets.only(top: 40.0, bottom: 20.0),
-                child: Image.asset(
-                  'assets/images/splash_image.png',
-                  height: 150,
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 40),
+            Image.asset(
+              'assets/images/splash_image.png',
+              height: 150,
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _loginController,
+              decoration: InputDecoration(
+                labelText: 'Логин',
+                prefixIcon: const Icon(Icons.person),
+              ),
+              onChanged: (value) => _updateFormState(),
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              controller: _passwordController,
+              obscureText: !_isPasswordVisible,
+              decoration: InputDecoration(
+                labelText: 'Пароль',
+                prefixIcon: const Icon(Icons.lock),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
                 ),
               ),
-
-              const SizedBox(height: 20),
-
-              // 📋 Поле ввода логина
-              TextField(
-                controller: _loginController,
-                decoration: InputDecoration(
-                  labelText: 'Логин',
-                  prefixIcon: const Icon(Icons.person),
-                  contentPadding: const EdgeInsets.symmetric(
-                      vertical: 20), // Увеличивает высоту
-                ),
-              ),
-              const SizedBox(height: 15),
-
-              // 📋 Поле ввода пароля с кнопкой показа/скрытия
-              TextField(
-                controller: _passwordController,
-                obscureText: !_isPasswordVisible, // Скрытие пароля
-                decoration: InputDecoration(
-                  labelText: 'Пароль',
-                  prefixIcon: const Icon(Icons.lock),
-                  contentPadding: const EdgeInsets.symmetric(
-                      vertical: 20), // Увеличивает высоту
-                  // 👁 Кнопка показа/скрытия пароля
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: AppColors.backgroundLight,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
+              onChanged: (value) => _updateFormState(),
+            ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      _isDarkMode ? AppColors.orangeForDark : AppColors.orange,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
+                onPressed: _isLoading || !_formCompleted ? null : _login,
+                child: _isLoading
+                    ? const CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      )
+                    : Text(
+                        'Войти',
+                        style: Theme.of(context).textTheme.headlineLarge,
+                      ),
               ),
-              const SizedBox(height: 30),
-
-              // 🔘 Кнопка "Войти"
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _isDarkMode
-                        ? AppColors.orangeForDark
-                        : AppColors.orange,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onPressed: _isLoading
-                      ? null // Блокируем кнопку, если идёт загрузка
-                      : _login, // Вызываем метод логина
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Text(
-                          'Войти',
-                          style: Theme.of(context).textTheme.headlineLarge,
-                        ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  void _updateFormState() {
+    setState(() {
+      _formCompleted = _loginController.text.isNotEmpty &&
+          _passwordController.text.isNotEmpty;
+    });
   }
 }

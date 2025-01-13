@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tabakroom_staff/screens/login_screen.dart';
+import 'package:tabakroom_staff/screens/auth_check.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/themes/theme_provider.dart';
 
@@ -30,7 +30,7 @@ class TabakRoomApp extends StatelessWidget {
         theme: CustomTheme.lightTheme, // Светлая тема
         darkTheme: CustomTheme.darkTheme, // Тёмная тема
         themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-        home: const LoginScreen(),
+        home: AuthCheck(),
       ),
     );
   }

@@ -14,7 +14,7 @@ dependencies:
   http: ^1.2.2 # Для запросов к серверу
   flutter_svg: ^1.1.4 # Для работы с SVG-иконками
   intl: ^0.17.0 # Форматирование дат и чисел
-  shared_preferences: ^2.0.13 # Локальное хранилище
+  shared_preferences: ^2.3.5 # Локальное хранилище
   flutter_secure_storage: ^5.0.2 # Безопасное хранилище
   charts_flutter: ^0.12.0 # Графики и диаграммы
   get_it: ^7.2.0 # DI контейнер
