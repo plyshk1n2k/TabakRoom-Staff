@@ -1,0 +1,20 @@
+class Warehouse {
+  final int? id;
+  final String name;
+
+  Warehouse({this.id, required this.name});
+
+  factory Warehouse.fromJson(Map<String, dynamic> json) {
+    return Warehouse(
+      id: json['id'],
+      name: json['name'] ?? 'Неизвестный склад',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+    };
+  }
+}

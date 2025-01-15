@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:tabakroom_staff/models/api_response.dart';
 import 'package:tabakroom_staff/screens/home_screen.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/services/auth_service.dart';
@@ -27,32 +28,24 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    try {
-      final response = await http.post(
-        Uri.parse('http://127.0.0.1:8000/api/token/'),
-        body: {
-          'username': _loginController.text,
-          'password': _passwordController.text,
-        },
-      );
+    ApiResponse<void> response = await AuthService.login(
+      _loginController.text,
+      _passwordController.text,
+    );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        await AuthService.saveToken(data['access']);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
-        _showSnackBar("Успешная авторизация!", success: true);
-      } else {
-        _showSnackBar("Ошибка авторизации!", success: false);
-      }
-    } catch (e) {
-      _showSnackBar("Произошла ошибка: $e", success: false);
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (response.isSuccess) {
+      _showSnackBar("Успешный вход!", success: true);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else {
+      _showSnackBar(response.error ?? "Ошибка авторизации", success: false);
     }
   }
 

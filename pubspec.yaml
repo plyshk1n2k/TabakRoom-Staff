@@ -32,6 +32,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - .env
 
 flutter_icons:
   android: true
