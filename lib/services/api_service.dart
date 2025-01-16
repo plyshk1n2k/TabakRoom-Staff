@@ -24,7 +24,6 @@ class ApiService {
     final refreshToken = await _getRefreshToken();
 
     if (refreshToken == null) return false;
-    print(refreshToken);
     final response = await http.post(
       Uri.parse('$_baseUrl/token/refresh/'),
       headers: {'Content-Type': 'application/json'},
