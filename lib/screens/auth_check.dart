@@ -15,10 +15,6 @@ class _AuthCheckState extends State<AuthCheck> {
   bool _isLoading = true;
   bool _isLoggedIn = false;
 
-  bool get _isDarkMode {
-    return Theme.of(context).brightness == Brightness.dark;
-  }
-
   @override
   void initState() {
     super.initState();

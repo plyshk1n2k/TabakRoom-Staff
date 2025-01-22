@@ -9,10 +9,10 @@ class ProductCard extends StatefulWidget {
   final bool isLoading;
 
   const ProductCard({
-    Key? key,
+    super.key,
     required this.productPriority,
     this.isLoading = false, // Значение по умолчанию
-  }) : super(key: key);
+  });
 
   @override
   _ProductCardState createState() => _ProductCardState();

@@ -24,9 +24,6 @@ class _LowStockScreenState extends State<LowStockScreen> {
   List<ProductCategories> filterProductCategories = [];
   late FilterOptions filterParams;
   bool dataIsLoaded = false;
-  bool get _isDarkMode {
-    return Theme.of(context).brightness == Brightness.dark;
-  }
 
   @override
   void initState() {

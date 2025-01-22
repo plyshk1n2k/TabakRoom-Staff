@@ -5,6 +5,7 @@ import 'package:tabakroom_staff/screens/incident_detail_screen.dart';
 import 'package:tabakroom_staff/services/suspicious_transactions_service.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/widgets/bottom_sheet.dart';
+import 'package:tabakroom_staff/widgets/filters_builder.dart';
 import 'package:tabakroom_staff/widgets/skeleton.dart';
 
 class SuspiciousTransactionsScreen extends StatefulWidget {
@@ -19,9 +20,7 @@ class _SuspiciousTransactionsScreenState
     extends State<SuspiciousTransactionsScreen> {
   List<DetectSuspiciousBonus> data = []; // ✅ Инициализируем пустым списком
   bool dataIsLoaded = false;
-  bool get _isDarkMode {
-    return Theme.of(context).brightness == Brightness.dark;
-  }
+  bool? value = false;
 
   @override
   void initState() {
@@ -49,26 +48,21 @@ class _SuspiciousTransactionsScreenState
 
   void showFilters() async {
     CustomBottomSheet.show(
-      context: context,
-      content: Padding(
-        padding: const EdgeInsets.fromLTRB(15, 5, 15, 0),
-        child: SingleChildScrollView(
-          // ✅ Добавляем скролл для всего контента
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // ✅ Ограничиваем размер
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Text(
-                  'Фильтрация',
-                  style: Theme.of(context).textTheme.headlineLarge,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+        context: context,
+        content: FiltersBuilder(data: [
+          FiltersData(
+              label: 'Статус проверки',
+              filterValues: [
+                FilterValues(label: 'Не проверенные', value: false),
+                FilterValues(label: 'Проверенные', value: true)
+              ],
+              currentValue: 'value',
+              onValueChange: (newValue) {
+                setState(() {
+                  value = newValue;
+                });
+              })
+        ]));
   }
 
   @override
@@ -172,7 +166,6 @@ class _SuspiciousTransactionsScreenState
                       ],
                     ),
                   ));
-                  ;
                 },
               ));
   }

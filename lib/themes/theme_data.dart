@@ -345,6 +345,6 @@ class CustomTheme {
         ),
         showUnselectedLabels: true,
       ),
-      dividerTheme: DividerThemeData(color: AppColors.backgroundDark),
+      dividerTheme: DividerThemeData(color: AppColors.backgroundLight),
       canvasColor: AppColors.backgroundLightTransparent);
 }
