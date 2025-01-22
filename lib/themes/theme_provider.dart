@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tabakroom_staff/services/app_preferences.dart';
 
 class ThemeProvider with ChangeNotifier {
   bool _isDarkMode = false; // Переменная для хранения текущей темы
@@ -13,8 +13,7 @@ class ThemeProvider with ChangeNotifier {
 
   // Метод для загрузки предпочтений о теме (светлая/тёмная) из SharedPreferences
   Future<void> _loadThemePreference() async {
-    final prefs = await SharedPreferences.getInstance();
-    _isDarkMode = prefs.getBool('isDarkMode') ??
+    _isDarkMode = await AppPreferences.getValue('isDarkMode') ??
         true; // Если нет предпочтений, по умолчанию светлая тема
     notifyListeners(); // Уведомление слушателей о том, что тема изменилась
   }
@@ -22,8 +21,8 @@ class ThemeProvider with ChangeNotifier {
   // Метод для переключения темы и сохранения в SharedPreferences
   Future<void> toggleTheme() async {
     _isDarkMode = !_isDarkMode;
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isDarkMode', _isDarkMode); // Сохраняем новый выбор темы
+    AppPreferences.setValue(
+        'isDarkMode', _isDarkMode); // Сохраняем новый выбор темы
     notifyListeners(); // Уведомление слушателей о том, что тема изменилась
   }
 }

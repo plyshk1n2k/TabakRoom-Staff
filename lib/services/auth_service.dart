@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabakroom_staff/models/api_response.dart';
 import 'package:tabakroom_staff/services/api_service.dart';
+import 'package:tabakroom_staff/services/app_preferences.dart';
 
 class AuthService {
   static const _tokenKey = 'access_token';
@@ -9,33 +9,28 @@ class AuthService {
 
   // Проверка токена
   static Future<bool> isLoggedIn() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString(_tokenKey);
+    String? token = await AppPreferences.getValue(_tokenKey);
     return token != null && token.isNotEmpty;
   }
 
   // Сохранение токена
   static Future<void> saveToken(String token) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_tokenKey, token);
+    await AppPreferences.setValue(_tokenKey, token);
   }
 
   // Сохранение refresh токена
   static Future<void> saveRefreshToken(String token) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_refreshTokenKey, token);
+    await AppPreferences.setValue(_refreshTokenKey, token);
   }
 
   // Удаление токена (выход)
   static Future<void> logout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_tokenKey);
+    await AppPreferences.remove(_tokenKey);
   }
 
   // Получение токена
   static Future<String?> getToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_tokenKey);
+    return AppPreferences.getValue(_tokenKey);
   }
 
 // Вход в систему

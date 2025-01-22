@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:tabakroom_staff/screens/auth_check.dart';
+import 'package:tabakroom_staff/services/app_preferences.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/themes/theme_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env"); // Загружаем .env
+  await AppPreferences.init();
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(),

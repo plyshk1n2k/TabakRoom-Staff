@@ -2,21 +2,19 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tabakroom_staff/services/app_preferences.dart';
 
 class ApiService {
   static final String? _baseUrl = dotenv.env['BASE_URL'];
 
   // Получаем access токен
   static Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('access_token');
+    return AppPreferences.getValue('access_token');
   }
 
   // Получаем refresh токен
   static Future<String?> _getRefreshToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('refresh_token');
+    return AppPreferences.getValue('refresh_token');
   }
 
   // Обновление access токена
@@ -32,8 +30,7 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('access_token', data['access']);
+      await AppPreferences.setValue('access_token', data['access']);
       return true;
     } else {
       return false;
