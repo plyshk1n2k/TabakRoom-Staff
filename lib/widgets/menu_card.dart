@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tabakroom_staff/themes/theme_data.dart';
 
 class MenuCard extends StatelessWidget {
   final IconData? icon;
@@ -18,8 +17,6 @@ class MenuCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
           if (screen != null) {
@@ -37,7 +34,7 @@ class MenuCard extends StatelessWidget {
                 Icon(
                   icon,
                   size: 50,
-                  color: AppColors.backgroundLight,
+                  color: Theme.of(context).iconTheme.color,
                 ),
               if (icon != null) const SizedBox(width: 20),
               Expanded(
@@ -53,9 +50,9 @@ class MenuCard extends StatelessWidget {
                 ),
               ),
               if (screen != null)
-                const Icon(
+                Icon(
                   Icons.arrow_forward_ios,
-                  color: AppColors.backgroundLight,
+                  color: Theme.of(context).iconTheme.color,
                 ),
             ],
           ),

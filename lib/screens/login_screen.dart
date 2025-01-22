@@ -3,6 +3,7 @@ import 'package:tabakroom_staff/models/api_response.dart';
 import 'package:tabakroom_staff/screens/home_screen.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/services/auth_service.dart';
+import 'package:tabakroom_staff/widgets/custom_elevated_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -110,28 +111,12 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 30),
             SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      _isDarkMode ? AppColors.orangeForDark : AppColors.orange,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: _isLoading || !_formCompleted ? null : _login,
-                child: _isLoading
-                    ? const CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      )
-                    : Text(
-                        'Войти',
-                        style: Theme.of(context).textTheme.headlineLarge,
-                      ),
-              ),
-            ),
+                width: double.infinity,
+                child: CustomElevatedButton(
+                  text: 'Войти',
+                  onPressed: _isLoading || !_formCompleted ? null : _login,
+                  isLoading: _isLoading,
+                )),
           ],
         ),
       ),

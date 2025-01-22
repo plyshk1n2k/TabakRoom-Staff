@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             MenuCard(
               icon: Icons.inventory_2_outlined,
-              title: 'Заканчивающиеся товары',
+              title: 'Анализ остатков',
               description: 'Приоритет закупок',
               screen: const LowStockScreen(),
             ),

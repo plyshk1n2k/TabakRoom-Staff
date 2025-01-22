@@ -23,9 +23,6 @@ class CustomBottomSheet {
             // Размытие и затемнение фона
             BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5), // Размытие
-              child: Container(
-                color: AppColors.backgroundDarkTransparent, // Затемнение
-              ),
             ),
             // Само окно
             Align(
@@ -40,7 +37,9 @@ class CustomBottomSheet {
                   builder: (context, scrollController) {
                     return Container(
                       decoration: BoxDecoration(
-                        color: AppColors.backgroundDark,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppColors.backgroundDark2
+                            : AppColors.backgroundLight,
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(16),
                         ),
@@ -53,7 +52,10 @@ class CustomBottomSheet {
                               width: 40,
                               height: 4,
                               decoration: BoxDecoration(
-                                color: AppColors.outlineBorderNonActiveForDark,
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? AppColors.backgroundLight
+                                    : AppColors.backgroundDark2,
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),

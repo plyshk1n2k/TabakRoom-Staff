@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tabakroom_staff/screens/product_details_screen.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/widgets/skeleton.dart';
 import '../models/product_purchase_priority.dart';
@@ -28,13 +29,13 @@ class _ProductCardState extends State<ProductCard> {
       case 'high':
         return isDarkMode ? AppColors.dangerForDark : AppColors.danger;
       case 'medium':
-        return isDarkMode ? AppColors.orangeForDark : AppColors.orange;
+        return isDarkMode ? AppColors.warningForDark : AppColors.warning;
       case 'low':
         return isDarkMode ? AppColors.secondaryForDark : AppColors.secondary;
       default:
         return isDarkMode
-            ? AppColors.disableElementForDark
-            : AppColors.disableElement;
+            ? AppColors.defaultElementForDark
+            : AppColors.defaultElement;
     }
   }
 
@@ -54,8 +55,6 @@ class _ProductCardState extends State<ProductCard> {
     if (widget.isLoading || widget.productPriority == null) {
       // Показываем SkeletonLoader
       return Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -74,87 +73,56 @@ class _ProductCardState extends State<ProductCard> {
       );
     }
     // Если данные загружены, показываем ProductCard
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    widget.productPriority!.product.name,
-                    style: Theme.of(context).textTheme.headlineMedium,
+    return GestureDetector(
+      onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ProductDetailsScreen(
+                  productName: widget.productPriority!.product.name,
+                  warehouse: widget.productPriority!.warehouse.name,
+                  salesLast7Days: widget.productPriority!.totalSalesLast7Days,
+                  salesLast30Days: widget.productPriority!.totalSalesLast30Days,
+                  salesLast180Days:
+                      widget.productPriority!.totalSalesLast180Days,
+                  currentStock: widget.productPriority!.currentStock,
+                  stockCoverageDays: widget.productPriority!.stockCoverageDays,
+                  priority: widget.productPriority!.priorityLevel))),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.productPriority!.product.name,
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _getPriorityColor(
-                        widget.productPriority!.priorityLevel,
-                        Theme.of(context).brightness == Brightness.dark),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                      widget.productPriority!.priorityLevel.toUpperCase(),
-                      style: Theme.of(context).textTheme.headlineSmall),
-                ),
-              ],
-            ),
-            Divider(
-              color: AppColors.backgroundLight,
-              height: 10,
-              endIndent: 5,
-            ),
-            RichText(
-              text: TextSpan(children: [
-                TextSpan(
-                    text: 'Склад: ',
-                    style: Theme.of(context).textTheme.headlineSmall),
-                TextSpan(
-                    text: widget.productPriority!.warehouse.name,
-                    style: Theme.of(context).textTheme.bodyMedium),
-              ]),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Продажи:',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            Text(
-              'за 7 дней: ${widget.productPriority!.totalSalesLast7Days} шт. | за 30 дней: ${widget.productPriority!.totalSalesLast30Days} шт.',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 4),
-            RichText(
-              text: TextSpan(children: [
-                TextSpan(
-                    text: 'Остаток: ',
-                    style: Theme.of(context).textTheme.headlineSmall),
-                TextSpan(
-                    text: '${widget.productPriority!.currentStock} шт.',
-                    style: Theme.of(context).textTheme.bodyMedium),
-              ]),
-            ),
-            const SizedBox(height: 4),
-            RichText(
-              text: TextSpan(children: [
-                TextSpan(
-                    text: 'Закончится через: ~',
-                    style: Theme.of(context).textTheme.headlineSmall),
-                TextSpan(
-                    text:
-                        '${widget.productPriority!.stockCoverageDays} ${_pluralizeDay(widget.productPriority!.stockCoverageDays)}',
-                    style: Theme.of(context).textTheme.bodyMedium),
-              ]),
-            ),
-          ],
+                  const SizedBox(width: 10),
+                  Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _getPriorityColor(
+                            widget.productPriority!.priorityLevel,
+                            Theme.of(context).brightness == Brightness.dark),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        widget.productPriority!.priorityLevel.toUpperCase(),
+                        style: TextStyle(
+                            color: AppColors.textLight,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold),
+                      )),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

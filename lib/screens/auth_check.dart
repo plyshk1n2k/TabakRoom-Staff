@@ -5,6 +5,8 @@ import 'login_screen.dart';
 import 'home_screen.dart';
 
 class AuthCheck extends StatefulWidget {
+  const AuthCheck({super.key});
+
   @override
   _AuthCheckState createState() => _AuthCheckState();
 }
@@ -39,8 +41,8 @@ class _AuthCheckState extends State<AuthCheck> {
       return Scaffold(
         body: Center(
             child: CircularProgressIndicator(
-          backgroundColor: AppColors.backgroundLight,
-          color: _isDarkMode ? AppColors.orangeForDark : AppColors.orange,
+          backgroundColor: AppColors.defaultElement,
+          color: AppColors.primary,
         )),
       );
     }

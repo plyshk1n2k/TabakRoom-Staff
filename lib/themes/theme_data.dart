@@ -1,37 +1,42 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFF008FFF);
-  static const Color primaryForDark = Color(0xFF45ADFF);
+  static const Color primary = Color(0xFF0A55EA);
+  static const Color primaryForDark = Color(0xFF0A55EA);
+  static const Color lightPrimary = Color(0xFF7DA6F5);
   static const Color primaryTransparent = Color.fromARGB(133, 68, 137, 255);
+  static const Color skyBlue = Color(0xFFC8DBFC);
 
-  static const Color secondary = Color(0xFF309054);
-  static const Color secondaryForDark = Color(0xFF44CC77);
+  static const Color secondary = Color(0xFF21C252);
+  static const Color secondaryForDark = Color(0xFF21C252);
 
-  static const Color danger = Color(0xFFB00020);
-  static const Color dangerForDark = Color(0xFFCF6679);
+  static const Color danger = Color(0xFFED004E);
+  static const Color dangerForDark = Color(0xFFED004E);
 
-  static const Color orange = Color(0xFFFF5436);
-  static const Color orangeForDark = Color(0xFFFF8975);
+  static const Color warning = Color(0xFFF0941E);
+  static const Color warningForDark = Color(0xFFF0941E);
 
   static const Color backgroundLight = Color(0xFFF5F8FF);
   static const Color backgroundLightTransparent = Colors.white10;
 
-  static const Color backgroundDark = Color(0xFF14212A);
-  static const Color backgroundDark2 = Color(0xFF2C3F50);
+  static const Color backgroundDark = Colors.black;
+  static const Color backgroundDark2 = Color(0xFF131315);
   static const Color backgroundDarkTransparent = Colors.black12;
 
   static const Color textLight = Color(0xFFEBF1F1);
-  static const Color textDark = Color(0xFF2C3F50);
+  static const Color textDark = Color.fromARGB(255, 0, 0, 0);
   static const Color textGrey = Colors.grey;
 
   static const Color outlineBorderNonActive = Color(0xFFBEC3C6);
   static const Color outlineBorderNonActiveForDark = Color(0xFFEBF1F1);
-  static const Color outlineBorderActive = primary;
-  static const Color outlineBorderActiveForDark = primaryForDark;
+  static const Color outlineBorderActive = lightPrimary;
+  static const Color outlineBorderActiveForDark = lightPrimary;
 
   static const Color disableElement = Color(0xFF6F6F6F);
   static const Color disableElementForDark = Color(0xFF7C7C7C);
+
+  static const Color defaultElement = Color(0xFFCACACF);
+  static const Color defaultElementForDark = Color(0xFF303036);
 }
 
 class CustomTheme {
@@ -51,11 +56,21 @@ class CustomTheme {
           ),
           elevation: 0, // Высота тени для всех AppBar
           scrolledUnderElevation: 0),
-      cardTheme: CardTheme(
-        color: const Color(0xFF2C3F50),
-        elevation: 5,
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.defaultElement,
+        checkmarkColor: AppColors.backgroundLight,
+        selectedColor: AppColors.primary,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      cardTheme: CardTheme(
+        color: AppColors.backgroundLight,
+        elevation: 5, // Высота тени
+        shadowColor: AppColors.defaultElement,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15), // Радиус скругления углов
+          side: BorderSide(color: AppColors.defaultElement), // Лёгкая граница
         ),
         margin: const EdgeInsets.symmetric(vertical: 8),
       ),
@@ -78,27 +93,29 @@ class CustomTheme {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            disabledBackgroundColor: AppColors.disableElement),
+            disabledBackgroundColor: AppColors.lightPrimary),
       ),
       textSelectionTheme: const TextSelectionThemeData(
-        cursorColor: AppColors.backgroundLight,
-        selectionColor: AppColors.primary,
-        selectionHandleColor: AppColors.backgroundLight,
+        cursorColor: AppColors.backgroundDark,
+        selectionColor: AppColors.lightPrimary,
+        selectionHandleColor: AppColors.backgroundDark,
       ),
       textTheme: const TextTheme(
-          headlineLarge: TextStyle(
-              color: AppColors.textLight,
-              fontSize: 20,
-              fontWeight: FontWeight.bold),
-          headlineMedium: TextStyle(
-              color: AppColors.textLight,
-              fontSize: 18,
-              fontWeight: FontWeight.bold),
-          headlineSmall: TextStyle(
-              color: AppColors.textLight,
-              fontSize: 16,
-              fontWeight: FontWeight.bold),
-          bodyMedium: TextStyle(color: AppColors.textLight, fontSize: 16)),
+        headlineLarge: TextStyle(
+            color: AppColors.textDark,
+            fontSize: 20,
+            fontWeight: FontWeight.bold),
+        headlineMedium: TextStyle(
+            color: AppColors.textDark,
+            fontSize: 18,
+            fontWeight: FontWeight.bold),
+        headlineSmall: TextStyle(
+            color: AppColors.textDark,
+            fontSize: 16,
+            fontWeight: FontWeight.bold),
+        bodyMedium: TextStyle(color: AppColors.textDark, fontSize: 16),
+        bodySmall: TextStyle(color: AppColors.textDark, fontSize: 14),
+      ),
       iconTheme: const IconThemeData(
         color: AppColors.backgroundDark,
       ),
@@ -120,26 +137,26 @@ class CustomTheme {
         border: const OutlineInputBorder(),
         focusedBorder: OutlineInputBorder(
           borderSide: const BorderSide(
-            color: AppColors.outlineBorderActive,
-            width: 3.0,
+            color: AppColors.lightPrimary,
+            width: 2.0,
           ),
           borderRadius: BorderRadius.circular(10),
         ),
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(
-            color: AppColors.outlineBorderNonActive,
-            width: 3.0,
+            color: AppColors.defaultElement,
+            width: 2.0,
           ),
           borderRadius: BorderRadius.circular(10),
         ),
         labelStyle: const TextStyle(
           fontSize: 16,
-          color: AppColors.textLight,
+          color: AppColors.textDark,
           fontWeight: FontWeight.bold,
         ),
         hintStyle: const TextStyle(
           fontSize: 14,
-          color: AppColors.textGrey,
+          color: AppColors.textDark,
           fontStyle: FontStyle.italic,
         ),
       ),
@@ -175,7 +192,7 @@ class CustomTheme {
         ),
         showUnselectedLabels: true,
       ),
-      dividerColor: AppColors.backgroundLight,
+      dividerTheme: DividerThemeData(color: AppColors.backgroundLight),
       canvasColor: AppColors.primaryTransparent);
 
   static ThemeData darkTheme = ThemeData(
@@ -195,19 +212,29 @@ class CustomTheme {
           elevation: 0, // Высота тени для всех AppBar
           scrolledUnderElevation: 0),
       textTheme: const TextTheme(
-          headlineLarge: TextStyle(
-              color: AppColors.textLight,
-              fontSize: 20,
-              fontWeight: FontWeight.bold),
-          headlineMedium: TextStyle(
-              color: AppColors.textLight,
-              fontSize: 18,
-              fontWeight: FontWeight.bold),
-          headlineSmall: TextStyle(
-              color: AppColors.textLight,
-              fontSize: 16,
-              fontWeight: FontWeight.bold),
-          bodyMedium: TextStyle(color: AppColors.textLight, fontSize: 16)),
+        headlineLarge: TextStyle(
+            color: AppColors.textLight,
+            fontSize: 20,
+            fontWeight: FontWeight.bold),
+        headlineMedium: TextStyle(
+            color: AppColors.textLight,
+            fontSize: 18,
+            fontWeight: FontWeight.bold),
+        headlineSmall: TextStyle(
+            color: AppColors.textLight,
+            fontSize: 16,
+            fontWeight: FontWeight.bold),
+        bodyMedium: TextStyle(color: AppColors.textLight, fontSize: 16),
+        bodySmall: TextStyle(color: AppColors.textLight, fontSize: 14),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.defaultElementForDark,
+        checkmarkColor: AppColors.backgroundLight,
+        selectedColor: AppColors.primaryForDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
       iconTheme: const IconThemeData(
         color: AppColors.backgroundLight,
       ),
@@ -226,7 +253,7 @@ class CustomTheme {
             fontWeight: FontWeight.bold),
       ),
       cardTheme: CardTheme(
-        color: const Color(0xFF34495E),
+        color: AppColors.backgroundDark2,
         elevation: 5,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
@@ -239,7 +266,7 @@ class CustomTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryForDark,
+            backgroundColor: AppColors.primary,
             foregroundColor: AppColors.backgroundLight,
             padding: const EdgeInsets.symmetric(
               horizontal: 12,
@@ -252,26 +279,26 @@ class CustomTheme {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            disabledBackgroundColor: AppColors.disableElementForDark),
+            disabledBackgroundColor: AppColors.lightPrimary),
       ),
       textSelectionTheme: const TextSelectionThemeData(
         cursorColor: AppColors.backgroundLight,
-        selectionColor: AppColors.primaryForDark,
+        selectionColor: AppColors.lightPrimary,
         selectionHandleColor: AppColors.backgroundLight,
       ),
       inputDecorationTheme: InputDecorationTheme(
         border: const OutlineInputBorder(),
         focusedBorder: OutlineInputBorder(
           borderSide: const BorderSide(
-            color: AppColors.outlineBorderActiveForDark,
-            width: 3.0,
+            color: AppColors.lightPrimary,
+            width: 2.0,
           ),
           borderRadius: BorderRadius.circular(10),
         ),
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(
-            color: AppColors.outlineBorderNonActiveForDark,
-            width: 3.0,
+            color: AppColors.defaultElement,
+            width: 2.0,
           ),
           borderRadius: BorderRadius.circular(10),
         ),
@@ -282,7 +309,7 @@ class CustomTheme {
         ),
         hintStyle: const TextStyle(
           fontSize: 14,
-          color: AppColors.textGrey,
+          color: AppColors.textLight,
           fontStyle: FontStyle.italic,
         ),
       ),
@@ -318,5 +345,6 @@ class CustomTheme {
         ),
         showUnselectedLabels: true,
       ),
+      dividerTheme: DividerThemeData(color: AppColors.backgroundDark),
       canvasColor: AppColors.backgroundLightTransparent);
 }
