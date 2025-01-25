@@ -106,8 +106,8 @@ class FilterOptions {
 
   // Асинхронный фабричный конструктор для загрузки данных из SharedPreferences
   static Future<FilterOptions> loadFromPreferences() async {
-    final json =
-        await AppPreferences.getValue<Map<String, dynamic>>('filter_options');
+    final json = await AppPreferences.getValue<Map<String, dynamic>>(
+        'product_filter_options');
     if (json != null) {
       return FilterOptions.fromJson(json);
     }
@@ -116,7 +116,7 @@ class FilterOptions {
 
   // Метод для сохранения фильтров в SharedPreferences
   Future<void> saveToPreferences() async {
-    await AppPreferences.setValue('filter_options', toJson());
+    await AppPreferences.setValue('product_filter_options', toJson());
   }
 
   // Преобразование в JSON
@@ -134,7 +134,7 @@ class FilterOptions {
 
   // Приватный метод для автоматического сохранения изменений
   void _saveToPreferences() {
-    AppPreferences.setValue('filter_options', toJson());
+    AppPreferences.setValue('product_filter_options', toJson());
   }
 
   void reset() {

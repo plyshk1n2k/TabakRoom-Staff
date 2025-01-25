@@ -20,7 +20,7 @@ class _SuspiciousTransactionsScreenState
     extends State<SuspiciousTransactionsScreen> {
   List<DetectSuspiciousBonus> data = []; // ✅ Инициализируем пустым списком
   bool dataIsLoaded = false;
-  bool? value = false;
+  late FilterOptions filterParams;
 
   @override
   void initState() {
@@ -29,12 +29,15 @@ class _SuspiciousTransactionsScreenState
   }
 
   void loadData() async {
+    filterParams = await FilterOptions.loadFromPreferences();
+
     setState(() {
       dataIsLoaded = false;
     });
 
     final ApiResponse<List<DetectSuspiciousBonus>> response =
-        await SuspiciousTransactionsService.fetchSuspiciousTransactions();
+        await SuspiciousTransactionsService.fetchSuspiciousTransactions(
+            filter: filterParams);
 
     setState(() {
       if (response.isSuccess && response.data != null) {
@@ -46,7 +49,7 @@ class _SuspiciousTransactionsScreenState
     });
   }
 
-  void showFilters() async {
+  void showFilters() {
     CustomBottomSheet.show(
         context: context,
         content: FiltersBuilder(data: [
@@ -56,11 +59,12 @@ class _SuspiciousTransactionsScreenState
                 FilterValues(label: 'Не проверенные', value: false),
                 FilterValues(label: 'Проверенные', value: true)
               ],
-              currentValue: 'value',
+              currentValue: filterParams.isResolved,
               onValueChange: (newValue) {
                 setState(() {
-                  value = newValue;
+                  filterParams.isResolved = newValue;
                 });
+                loadData();
               })
         ]));
   }

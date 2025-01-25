@@ -4,10 +4,8 @@ import 'package:tabakroom_staff/models/product_categories.dart';
 import 'package:tabakroom_staff/models/product_purchase_priority.dart';
 import 'package:tabakroom_staff/models/warehouse.dart';
 import 'package:tabakroom_staff/services/purchase_priority_service.dart';
-import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/widgets/bottom_sheet.dart';
-import 'package:tabakroom_staff/widgets/custom_elevated_button.dart';
-import 'package:tabakroom_staff/widgets/filter_chips.dart';
+import 'package:tabakroom_staff/widgets/filters_builder.dart';
 import 'package:tabakroom_staff/widgets/product_card.dart'; // Убедись, что MenuCard импортирован
 
 class LowStockScreen extends StatefulWidget {
@@ -19,9 +17,9 @@ class LowStockScreen extends StatefulWidget {
 
 class _LowStockScreenState extends State<LowStockScreen> {
   List<ProductPurchasePriority> data = []; // ✅ Инициализируем пустым списком
-  List<String> filterPriorities = [];
-  List<Warehouse> filterWarehouses = [];
-  List<ProductCategories> filterProductCategories = [];
+  List<FilterValues<dynamic>> filterPriorities = [];
+  List<FilterValues<dynamic>> filterWarehouses = [];
+  List<FilterValues<dynamic>> filterProductCategories = [];
   late FilterOptions filterParams;
   bool dataIsLoaded = false;
 
@@ -41,7 +39,9 @@ class _LowStockScreenState extends State<LowStockScreen> {
         await PurchasePriorityService.fetchPriorities();
     setState(() {
       if (responsePriorities.isSuccess && responsePriorities.data != null) {
-        filterPriorities = responsePriorities.data!;
+        filterPriorities = responsePriorities.data!
+            .map((element) => FilterValues(label: element, value: element))
+            .toList();
       }
     });
 
@@ -50,7 +50,10 @@ class _LowStockScreenState extends State<LowStockScreen> {
 
     setState(() {
       if (responseWarehouses.isSuccess && responsePriorities.data != null) {
-        filterWarehouses = responseWarehouses.data!;
+        filterWarehouses = responseWarehouses.data!
+            .map((element) =>
+                FilterValues(label: element.name, value: element.id))
+            .toList();
       }
     });
 
@@ -60,7 +63,10 @@ class _LowStockScreenState extends State<LowStockScreen> {
     setState(() {
       if (responseProductCategories.isSuccess &&
           responseProductCategories.data != null) {
-        filterProductCategories = responseProductCategories.data!;
+        filterProductCategories = responseProductCategories.data!
+            .map((element) =>
+                FilterValues(label: element.name, value: element.id))
+            .toList();
       }
     });
 
@@ -88,106 +94,39 @@ class _LowStockScreenState extends State<LowStockScreen> {
 
   void showFilters() async {
     CustomBottomSheet.show(
-      context: context,
-      content: Padding(
-          padding: const EdgeInsets.fromLTRB(15, 5, 15, 0),
-          child: Column(
-            children: [
-              SingleChildScrollView(
-                // ✅ Добавляем скролл для всего контента
-                child: Column(
-                  mainAxisSize: MainAxisSize.min, // ✅ Ограничиваем размер
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Text(
-                        'Фильтрация',
-                        style: Theme.of(context).textTheme.headlineLarge,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Приоритет',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    Divider(
-                      height: 15,
-                      color: Theme.of(context).dividerTheme.color,
-                    ),
-                    FilterChips(
-                      options: filterPriorities,
-                      selectedOption: filterParams.priorityLevel,
-                      onSelected: (p0) {
-                        setState(() {
-                          filterParams.priorityLevel = p0;
-                        });
-                        loadProducts();
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Склад',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    Divider(
-                      height: 15,
-                      color: Theme.of(context).dividerTheme.color,
-                    ),
-                    FilterChips(
-                      selectedOption: filterParams.warehouseId,
-                      options: filterWarehouses
-                          .map((item) => {'id': item.id, 'label': item.name})
-                          .toList(),
-                      onSelected: (item) {
-                        setState(() {
-                          filterParams.warehouseId = item;
-                        });
-                        loadProducts();
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Группы',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    Divider(
-                      height: 15,
-                      color: Theme.of(context).dividerTheme.color,
-                    ),
-                    FilterChips(
-                      selectedOption: filterParams.groupId,
-                      options: filterProductCategories
-                          .map((item) => {'id': item.id, 'label': item.name})
-                          .toList(),
-                      onSelected: (item) {
-                        setState(() {
-                          filterParams.groupId = item;
-                        });
-                        loadProducts();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 50,
-              ),
-              CustomElevatedButton(
-                text: 'Сбросить параметры',
-                backgroundColor: AppColors.danger,
-                onPressed: filterParams.isEmpty
-                    ? null
-                    : () {
-                        setState(() {
-                          filterParams.reset(); // Сброс параметров
-                        });
-                        print(filterParams.priorityLevel);
-                        loadProducts(); // Обновляем данные
-                      },
-              )
-            ],
-          )),
-    );
+        context: context,
+        content: FiltersBuilder(data: [
+          FiltersData(
+              label: 'Приоритет',
+              filterValues: filterPriorities,
+              currentValue: filterParams.priorityLevel,
+              onValueChange: (newValue) {
+                setState(() {
+                  filterParams.priorityLevel = newValue;
+                });
+                loadProducts();
+              }),
+          FiltersData(
+              label: 'Склад',
+              filterValues: filterWarehouses,
+              currentValue: filterParams.warehouseId,
+              onValueChange: (newValue) {
+                setState(() {
+                  filterParams.warehouseId = newValue;
+                });
+                loadProducts();
+              }),
+          FiltersData(
+              label: 'Группы товаров',
+              filterValues: filterProductCategories,
+              currentValue: filterParams.groupId,
+              onValueChange: (newValue) {
+                setState(() {
+                  filterParams.groupId = newValue;
+                });
+                loadProducts();
+              }),
+        ]));
   }
 
   @override

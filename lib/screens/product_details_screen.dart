@@ -22,6 +22,17 @@ class ProductDetailsScreen extends StatelessWidget {
     required this.priority,
   }) : super(key: key);
 
+  String _pluralizeDay(int days) {
+    if (days % 10 == 1 && days % 100 != 11) {
+      return 'день';
+    } else if ([2, 3, 4].contains(days % 10) &&
+        ![12, 13, 14].contains(days % 100)) {
+      return 'дня';
+    } else {
+      return 'дней';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,7 +84,7 @@ class ProductDetailsScreen extends StatelessWidget {
             _buildInfoCard(
               context,
               title: 'Ориентировочно хватит',
-              content: '$stockCoverageDays дней',
+              content: '$stockCoverageDays ${_pluralizeDay(stockCoverageDays)}',
               icon: Icons.access_time_outlined,
             ),
 

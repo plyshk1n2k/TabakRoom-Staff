@@ -1,5 +1,6 @@
 import 'package:tabakroom_staff/models/bonus_transactions.dart';
 import 'package:tabakroom_staff/models/counterparty.dart';
+import 'package:tabakroom_staff/services/app_preferences.dart';
 
 class DetectSuspiciousBonus {
   final int id;
@@ -52,30 +53,67 @@ class DetectSuspiciousBonus {
 }
 
 class FilterOptions {
-  bool? isResolved; // Проверено ли
-  FilterOptions({
-    this.isResolved,
-  });
+  bool? _isResolved; // Закрытое поле для флага "Проверено ли"
 
-  // 📦 Конструктор из JSON (например, для хранения в SharedPreferences)
+  // Геттер для доступа к значению
+  bool? get isResolved => _isResolved;
+
+  // Сеттер с автоматическим сохранением
+  set isResolved(bool? value) {
+    _isResolved = value;
+    _saveToPreferences();
+  }
+
+  // Конструктор
+  FilterOptions({
+    bool? isResolved,
+  }) : _isResolved = isResolved;
+
+  // Конструктор из JSON
   factory FilterOptions.fromJson(Map<String, dynamic> json) {
     return FilterOptions(
       isResolved: json['is_resolved'],
     );
   }
 
-  // 🔄 Преобразование в JSON (для отправки на сервер)
+  // Асинхронный фабричный конструктор для загрузки данных из SharedPreferences
+  static Future<FilterOptions> loadFromPreferences() async {
+    final json = await AppPreferences.getValue<Map<String, dynamic>>(
+        'transactions_filter_options');
+    if (json != null) {
+      return FilterOptions.fromJson(json);
+    }
+    return FilterOptions(); // Возвращаем объект с дефолтными значениями
+  }
+
+  // Метод для сохранения фильтров в SharedPreferences
+  Future<void> saveToPreferences() async {
+    await AppPreferences.setValue('transactions_filter_options', toJson());
+  }
+
+  // Преобразование в JSON
   Map<String, dynamic> toJson() {
     return {
-      if (isResolved != null) 'is_resolved': isResolved,
+      if (_isResolved != null) 'is_resolved': _isResolved,
     };
   }
 
-  // ✅ Проверка, пустой ли фильтр
-  bool get isEmpty => isResolved == null;
+  // Проверка, пустой ли фильтр
+  bool get isEmpty => _isResolved == null;
 
-  // 🔄 Установка новых значений
+  // Приватный метод для автоматического сохранения изменений
+  void _saveToPreferences() {
+    AppPreferences.setValue('transactions_filter_options', toJson());
+  }
+
+  // Метод для обновления значений
   void update({bool? isResolved}) {
     if (isResolved != null) this.isResolved = isResolved;
+  }
+
+  // Метод для сброса значений
+  void reset() {
+    _isResolved = null;
+    _saveToPreferences();
   }
 }

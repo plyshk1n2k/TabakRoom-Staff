@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tabakroom_staff/widgets/filter_chips.dart';
 
 class FiltersBuilder extends StatefulWidget {
   final List<FiltersData> data;

@@ -39,17 +39,6 @@ class _ProductCardState extends State<ProductCard> {
     }
   }
 
-  String _pluralizeDay(int days) {
-    if (days % 10 == 1 && days % 100 != 11) {
-      return 'день';
-    } else if ([2, 3, 4].contains(days % 10) &&
-        ![12, 13, 14].contains(days % 100)) {
-      return 'дня';
-    } else {
-      return 'дней';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (widget.isLoading || widget.productPriority == null) {
