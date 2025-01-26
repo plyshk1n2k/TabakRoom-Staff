@@ -10,6 +10,7 @@ class AuthService {
   // Проверка токена
   static Future<bool> isLoggedIn() async {
     String? token = await AppPreferences.getValue(_tokenKey);
+    print(token);
     return token != null && token.isNotEmpty;
   }
 
@@ -26,6 +27,7 @@ class AuthService {
   // Удаление токена (выход)
   static Future<void> logout() async {
     await AppPreferences.remove(_tokenKey);
+    await AppPreferences.remove(_refreshTokenKey);
   }
 
   // Получение токена

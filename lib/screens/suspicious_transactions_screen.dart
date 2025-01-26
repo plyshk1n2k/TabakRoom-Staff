@@ -94,7 +94,7 @@ class _SuspiciousTransactionsScreenState
                     itemBuilder: (context, index) {
                       final item = data[index];
                       return Opacity(
-                        opacity: 0.5,
+                        opacity: item.isResolved ? 0.5 : 1,
                         child: Card(
                           child: ListTile(
                               leading: !item.isResolved

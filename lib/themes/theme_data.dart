@@ -39,6 +39,13 @@ class AppColors {
   static const Color defaultElementForDark = Color(0xFF303036);
 }
 
+enum WidgetType {
+  primary, // Основной
+  warning, // Предупреждение
+  danger, // Ошибка
+  success, // Успех
+}
+
 class CustomTheme {
   static ThemeData lightTheme = ThemeData(
       brightness: Brightness.light,

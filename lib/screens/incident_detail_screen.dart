@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tabakroom_staff/models/bonus_transactions.dart';
-import 'package:tabakroom_staff/services/suspicious_transactions_service.dart'; // Импорт вашего ApiService
+import 'package:tabakroom_staff/services/suspicious_transactions_service.dart';
+import 'package:tabakroom_staff/themes/theme_data.dart';
+import 'package:tabakroom_staff/widgets/custom_snakbar.dart'; // Импорт вашего ApiService
 
 class IncidentDetailsPage extends StatelessWidget {
   final String userName;
@@ -178,16 +180,14 @@ class IncidentDetailsPage extends StatelessWidget {
         incidentId: incidentId);
 
     if (result.isSuccess) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Инцидент успешно отмечен как проверенный')),
-      );
+      CustomSnackbar.show(context,
+          message: 'Инцидент успешно отмечен как проверенный',
+          type: WidgetType.success);
       Navigator.of(context)
           .pop(true); // Возвращаемся назад после успешной проверки
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.error ?? 'Произошла ошибка')),
-      );
+      CustomSnackbar.show(context,
+          message: 'Ошибка запроса, попробуйте позже', type: WidgetType.danger);
     }
   }
 }

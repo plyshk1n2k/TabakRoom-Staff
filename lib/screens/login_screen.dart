@@ -4,6 +4,7 @@ import 'package:tabakroom_staff/screens/home_screen.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/services/auth_service.dart';
 import 'package:tabakroom_staff/widgets/custom_elevated_button.dart';
+import 'package:tabakroom_staff/widgets/custom_snakbar.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -37,29 +38,18 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     if (response.isSuccess) {
-      _showSnackBar("Успешный вход!", success: true);
+      CustomSnackbar.show(context,
+          message: 'Успешный вход', type: WidgetType.success);
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else {
-      _showSnackBar(response.error ?? "Ошибка авторизации", success: false);
+      CustomSnackbar.show(context,
+          message: response.error ?? "Ошибка авторизации",
+          type: WidgetType.danger);
     }
-  }
-
-  void _showSnackBar(String message, {required bool success}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: Theme.of(context).textTheme.headlineLarge,
-        ),
-        backgroundColor: success
-            ? (_isDarkMode ? AppColors.secondaryForDark : AppColors.secondary)
-            : (_isDarkMode ? AppColors.dangerForDark : AppColors.danger),
-      ),
-    );
   }
 
   @override
