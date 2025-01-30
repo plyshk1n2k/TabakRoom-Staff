@@ -74,6 +74,7 @@ class _SuspiciousTransactionsScreenState
     return Scaffold(
         appBar: AppBar(
           title: const Text('Анализ транзакций'),
+          centerTitle: true,
           actions: [
             IconButton(
                 onPressed: () => showFilters(),

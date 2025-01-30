@@ -1,11 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:tabakroom_staff/services/app_preferences.dart';
 
 class ApiService {
-  static final String? _baseUrl = dotenv.env['BASE_URL'];
+  static final String? _baseUrl = dotenv.env['MODE'] == 'TEST'
+      ? Platform.isAndroid
+          ? dotenv.env['TEST_BASE_URL_ANDROID'] // Для Android
+          : dotenv.env['TEST_BASE_URL']
+      : dotenv.env['PROD_BASE_URL']; // Для iOS
 
   // Получаем access токен
   static Future<String?> _getToken() async {

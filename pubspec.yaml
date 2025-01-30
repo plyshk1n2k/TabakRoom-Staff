@@ -12,12 +12,12 @@ dependencies:
   cupertino_icons: ^1.0.8
   provider: ^6.1.2 # Управление состоянием
   http: ^1.2.2 # Для запросов к серверу
-  flutter_svg: ^1.1.4 # Для работы с SVG-иконками
+  flutter_svg: ^2.0.17 # Для работы с SVG-иконками
   intl: ^0.17.0 # Форматирование дат и чисел
-  shared_preferences: ^2.3.5 # Локальное хранилище
-  flutter_secure_storage: ^5.0.2 # Безопасное хранилище
+  shared_preferences: ^2.3.5 # Поддерживает iOS и Android, проблем нет
+  flutter_secure_storage: ^9.2.4 # Последняя стабильная версия с поддержкой EncryptedSharedPreferences
   charts_flutter: ^0.12.0 # Графики и диаграммы
-  get_it: ^7.2.0 # DI контейнер
+  get_it: ^8.0.3 # DI контейнер
   flutter_launcher_icons: ^0.14.2
   flutter_native_splash: ^2.4.4
   flutter_dotenv: ^5.2.1
@@ -39,10 +39,15 @@ flutter_icons:
   android: true
   ios: true
   image_path: "assets/icons/app_icon.png"
+  adaptive_icon_background: "#000000" # Фон для Android 8+
+  adaptive_icon_foreground: "assets/icons/app_icon.png" # Передний слой адаптивной иконки
 
 flutter_native_splash:
   color: "#000000" # Фон
   image: assets/images/splash_image.png # Путь к изображению
   android: true
   ios: true
+  fullscreen: false # Разворачивает на весь экран
   android_gravity: center # Центрирование изображения
+  android_12:
+    color: "#000000"

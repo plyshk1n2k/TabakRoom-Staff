@@ -10,7 +10,6 @@ class AuthService {
   // Проверка токена
   static Future<bool> isLoggedIn() async {
     String? token = await AppPreferences.getValue(_tokenKey);
-    print(token);
     return token != null && token.isNotEmpty;
   }
 

@@ -23,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(
           'ТабакRoom - Главная',
         ),
+        centerTitle: true,
         leading: // Кнопка для смены темы с разными иконками
             IconButton(
           icon: Icon(

@@ -134,6 +134,7 @@ class _LowStockScreenState extends State<LowStockScreen> {
     return Scaffold(
         appBar: AppBar(
           title: const Text('Анализ остатков'),
+          centerTitle: true,
           actions: [
             IconButton(
                 onPressed: () => showFilters(),
