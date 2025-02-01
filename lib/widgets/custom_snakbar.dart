@@ -147,7 +147,10 @@ class _SnackbarContentState extends State<_SnackbarContent>
                 Expanded(
                   child: Text(
                     widget.message,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: TextStyle(
+                        color: AppColors.textLight,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
               ],

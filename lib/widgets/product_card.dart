@@ -27,11 +27,11 @@ class _ProductCardState extends State<ProductCard> {
   Color _getPriorityColor(String priority, bool isDarkMode) {
     switch (priority.toLowerCase()) {
       case 'high':
-        return isDarkMode ? AppColors.dangerForDark : AppColors.danger;
+        return AppColors.danger;
       case 'medium':
-        return isDarkMode ? AppColors.warningForDark : AppColors.warning;
+        return AppColors.warning;
       case 'low':
-        return isDarkMode ? AppColors.secondaryForDark : AppColors.secondary;
+        return AppColors.secondary;
       default:
         return isDarkMode
             ? AppColors.defaultElementForDark

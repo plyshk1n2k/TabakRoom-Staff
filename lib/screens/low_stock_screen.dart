@@ -95,38 +95,39 @@ class _LowStockScreenState extends State<LowStockScreen> {
   void showFilters() async {
     CustomBottomSheet.show(
         context: context,
-        content: FiltersBuilder(data: [
-          FiltersData(
-              label: 'Приоритет',
-              filterValues: filterPriorities,
-              currentValue: filterParams.priorityLevel,
-              onValueChange: (newValue) {
-                setState(() {
-                  filterParams.priorityLevel = newValue;
-                });
-                loadProducts();
-              }),
-          FiltersData(
-              label: 'Склад',
-              filterValues: filterWarehouses,
-              currentValue: filterParams.warehouseId,
-              onValueChange: (newValue) {
-                setState(() {
-                  filterParams.warehouseId = newValue;
-                });
-                loadProducts();
-              }),
-          FiltersData(
-              label: 'Группы товаров',
-              filterValues: filterProductCategories,
-              currentValue: filterParams.groupId,
-              onValueChange: (newValue) {
-                setState(() {
-                  filterParams.groupId = newValue;
-                });
-                loadProducts();
-              }),
-        ]));
+        content: FiltersBuilder(
+            onApply: () async {
+              loadProducts();
+            },
+            data: [
+              FiltersData(
+                  label: 'Приоритет',
+                  filterValues: filterPriorities,
+                  currentValue: filterParams.priorityLevel,
+                  onValueChange: (newValue) {
+                    setState(() {
+                      filterParams.priorityLevel = newValue;
+                    });
+                  }),
+              FiltersData(
+                  label: 'Склад',
+                  filterValues: filterWarehouses,
+                  currentValue: filterParams.warehouseId,
+                  onValueChange: (newValue) {
+                    setState(() {
+                      filterParams.warehouseId = newValue;
+                    });
+                  }),
+              FiltersData(
+                  label: 'Группы товаров',
+                  filterValues: filterProductCategories,
+                  currentValue: filterParams.groupId,
+                  onValueChange: (newValue) {
+                    setState(() {
+                      filterParams.groupId = newValue;
+                    });
+                  }),
+            ]));
   }
 
   @override
@@ -144,27 +145,31 @@ class _LowStockScreenState extends State<LowStockScreen> {
                 ))
           ],
         ),
-        body: dataIsLoaded
-            ? data.isEmpty
-                ? Center(
-                    child: Text('Данные отсутствуют'),
-                  )
+        body: RefreshIndicator.adaptive(
+            onRefresh: () async {
+              loadProducts();
+            },
+            child: dataIsLoaded
+                ? data.isEmpty
+                    ? Center(
+                        child: Text('Данные отсутствуют'),
+                      )
+                    : ListView.builder(
+                        itemCount: data.length,
+                        padding: const EdgeInsets.all(16.0),
+                        itemBuilder: (context, index) {
+                          final item = data[index];
+                          return ProductCard(
+                              productPriority: item, isLoading: false);
+                        },
+                      )
                 : ListView.builder(
-                    itemCount: data.length,
+                    itemCount: 8, // Скелетонов будет 5
                     padding: const EdgeInsets.all(16.0),
                     itemBuilder: (context, index) {
-                      final item = data[index];
-                      return ProductCard(
-                          productPriority: item, isLoading: false);
+                      return const ProductCard(
+                          productPriority: null, isLoading: true);
                     },
-                  )
-            : ListView.builder(
-                itemCount: 8, // Скелетонов будет 5
-                padding: const EdgeInsets.all(16.0),
-                itemBuilder: (context, index) {
-                  return const ProductCard(
-                      productPriority: null, isLoading: true);
-                },
-              ));
+                  )));
   }
 }

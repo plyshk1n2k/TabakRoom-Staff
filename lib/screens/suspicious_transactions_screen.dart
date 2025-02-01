@@ -52,21 +52,24 @@ class _SuspiciousTransactionsScreenState
   void showFilters() {
     CustomBottomSheet.show(
         context: context,
-        content: FiltersBuilder(data: [
-          FiltersData(
-              label: 'Статус проверки',
-              filterValues: [
-                FilterValues(label: 'Не проверенные', value: false),
-                FilterValues(label: 'Проверенные', value: true)
-              ],
-              currentValue: filterParams.isResolved,
-              onValueChange: (newValue) {
-                setState(() {
-                  filterParams.isResolved = newValue;
-                });
-                loadData();
-              })
-        ]));
+        content: FiltersBuilder(
+            onApply: () async {
+              loadData();
+            },
+            data: [
+              FiltersData(
+                  label: 'Статус проверки',
+                  filterValues: [
+                    FilterValues(label: 'Не проверенные', value: false),
+                    FilterValues(label: 'Проверенные', value: true)
+                  ],
+                  currentValue: filterParams.isResolved,
+                  onValueChange: (newValue) {
+                    setState(() {
+                      filterParams.isResolved = newValue;
+                    });
+                  })
+            ]));
   }
 
   @override
@@ -84,94 +87,101 @@ class _SuspiciousTransactionsScreenState
                 ))
           ],
         ),
-        body: dataIsLoaded
-            ? data.isEmpty
-                ? Center(
-                    child: Text('Данные отсутствуют'),
-                  )
+        body: RefreshIndicator.adaptive(
+            onRefresh: () async {
+              loadData();
+            },
+            child: dataIsLoaded
+                ? data.isEmpty
+                    ? Center(
+                        child: Text('Данные отсутствуют'),
+                      )
+                    : ListView.builder(
+                        itemCount: data.length,
+                        padding: const EdgeInsets.all(16.0),
+                        itemBuilder: (context, index) {
+                          final item = data[index];
+                          return Opacity(
+                            opacity: item.isResolved ? 0.5 : 1,
+                            child: Card(
+                              child: ListTile(
+                                  leading: !item.isResolved
+                                      ? Icon(
+                                          Icons.warning_amber_outlined,
+                                          color: AppColors.warning,
+                                          size: 30,
+                                        )
+                                      : Icon(
+                                          Icons.check_circle_outline,
+                                          size: 30,
+                                          color: AppColors.secondary,
+                                        ),
+                                  title: Text(
+                                    'Клиент - ${item.user.name}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium,
+                                  ),
+                                  subtitle: Text(
+                                    'Количество транзакций: ${item.transactions.length}',
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                  trailing: Icon(
+                                    Icons.arrow_forward_ios,
+                                    color: Theme.of(context).iconTheme.color,
+                                  ),
+                                  onTap: () async {
+                                    final shouldReload = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                IncidentDetailsPage(
+                                                  userName: item.user.name,
+                                                  detectedAt: item.detectedAt,
+                                                  isResolved: item.isResolved,
+                                                  transactions:
+                                                      item.transactions,
+                                                  incidentId: item.id,
+                                                )));
+                                    if (shouldReload == true) {
+                                      loadData(); // Метод для перезагрузки данных
+                                    }
+                                  }),
+                            ),
+                          );
+                        },
+                      )
                 : ListView.builder(
-                    itemCount: data.length,
+                    itemCount: 8, // Скелетонов будет 5
                     padding: const EdgeInsets.all(16.0),
                     itemBuilder: (context, index) {
-                      final item = data[index];
-                      return Opacity(
-                        opacity: item.isResolved ? 0.5 : 1,
-                        child: Card(
-                          child: ListTile(
-                              leading: !item.isResolved
-                                  ? Icon(
-                                      Icons.warning_amber_outlined,
-                                      color: AppColors.warning,
-                                      size: 30,
-                                    )
-                                  : Icon(
-                                      Icons.check_circle_outline,
-                                      size: 30,
-                                      color: AppColors.secondary,
-                                    ),
-                              title: Text(
-                                'Клиент - ${item.user.name}',
-                                style:
-                                    Theme.of(context).textTheme.headlineMedium,
-                              ),
-                              subtitle: Text(
-                                'Количество транзакций: ${item.transactions.length}',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              trailing: Icon(
-                                Icons.arrow_forward_ios,
-                                color: Theme.of(context).iconTheme.color,
-                              ),
-                              onTap: () async {
-                                final shouldReload = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            IncidentDetailsPage(
-                                              userName: item.user.name,
-                                              detectedAt: item.detectedAt,
-                                              isResolved: item.isResolved,
-                                              transactions: item.transactions,
-                                              incidentId: item.id,
-                                            )));
-                                if (shouldReload == true) {
-                                  loadData(); // Метод для перезагрузки данных
-                                }
-                              }),
-                        ),
-                      );
-                    },
-                  )
-            : ListView.builder(
-                itemCount: 8, // Скелетонов будет 5
-                padding: const EdgeInsets.all(16.0),
-                itemBuilder: (context, index) {
-                  return Card(
-                      child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        SkeletonLoader(
-                          width: 40,
-                          height: 40,
-                        ),
-                        SizedBox(
-                          width: 30,
-                        ),
-                        Flexible(
-                            child: Column(
+                      return Card(
+                          child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
                           children: [
-                            SkeletonLoader(),
-                            SizedBox(
-                              height: 10,
+                            SkeletonLoader(
+                              width: 40,
+                              height: 40,
                             ),
-                            SkeletonLoader()
+                            SizedBox(
+                              width: 30,
+                            ),
+                            Flexible(
+                                child: Column(
+                              children: [
+                                SkeletonLoader(),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                SkeletonLoader()
+                              ],
+                            ))
                           ],
-                        ))
-                      ],
-                    ),
-                  ));
-                },
-              ));
+                        ),
+                      ));
+                    },
+                  )));
   }
 }

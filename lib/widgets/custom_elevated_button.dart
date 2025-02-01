@@ -1,41 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
 
+enum ButtonType {
+  primary, // Основная кнопка
+  danger, // Опасная (красная)
+  success, // Успешная (зелёная)
+  warning, // Предупреждающая (жёлтая)
+}
+
 class CustomElevatedButton extends StatelessWidget {
   final VoidCallback? onPressed;
-  final Color backgroundColor;
-  final Color disabledBackgroundColor;
-  final Color textColor;
-  final double borderRadius;
-  final double padding;
-  final double elevation;
   final bool isLoading;
   final String text;
+  final ButtonType buttonType;
 
   const CustomElevatedButton({
     super.key,
     required this.onPressed,
     required this.text,
+    required this.buttonType,
     this.isLoading = false,
-    this.backgroundColor = AppColors.primary, // Цвет фона по умолчанию
-    this.disabledBackgroundColor =
-        AppColors.lightPrimary, // Цвет фона заблокированного элемента
-    this.textColor = AppColors.textLight, // Цвет текста по умолчанию
-    this.borderRadius = 8.0, // Радиус скругления
-    this.padding = 16.0, // Отступ внутри кнопки
-    this.elevation = 4.0, // Высота тени
   });
+
+  Color getButtonColor() {
+    switch (buttonType) {
+      case ButtonType.primary:
+        return AppColors.primary;
+      case ButtonType.danger:
+        return AppColors.danger;
+      case ButtonType.success:
+        return AppColors.secondary;
+      case ButtonType.warning:
+        return AppColors.warning;
+    }
+  }
+
+  Color getDisableButtonColor() {
+    switch (buttonType) {
+      case ButtonType.primary:
+        return AppColors.lightPrimary;
+      case ButtonType.danger:
+        return AppColors.lightDanger;
+      case ButtonType.success:
+        return AppColors.lightSecondary;
+      case ButtonType.warning:
+        return AppColors.lightWarning;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        disabledBackgroundColor: disabledBackgroundColor,
-        backgroundColor: backgroundColor, // Цвет кнопки
-        elevation: elevation, // Тень кнопки
-        padding: EdgeInsets.all(padding), // Внутренний отступ
+        disabledBackgroundColor: getDisableButtonColor(),
+        backgroundColor: getButtonColor(), // Цвет кнопки
+        elevation: 4.0, // Тень кнопки
+        padding: EdgeInsets.all(12), // Внутренний отступ
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadius), // Скругление углов
+          borderRadius: BorderRadius.circular(8.0), // Скругление углов
         ),
       ),
       onPressed: onPressed,
@@ -46,7 +68,10 @@ class CustomElevatedButton extends StatelessWidget {
             )
           : Text(
               text,
-              style: TextStyle(color: AppColors.textLight),
+              style: TextStyle(
+                  color: AppColors.textLight,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold),
             ),
     );
   }

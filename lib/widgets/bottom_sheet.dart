@@ -8,7 +8,7 @@ class CustomBottomSheet {
     required Widget content,
     bool isDismissible = true,
     bool enableDrag = true,
-    double initialHeight = 0.7,
+    double initialHeight = 0.8,
     double widthFactor = 1, // Коэффициент ширины окна
   }) {
     showModalBottomSheet(

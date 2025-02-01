@@ -104,6 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
                 width: double.infinity,
                 child: CustomElevatedButton(
+                  buttonType: ButtonType.primary,
                   text: 'Войти',
                   onPressed: _isLoading || !_formCompleted ? null : _login,
                   isLoading: _isLoading,

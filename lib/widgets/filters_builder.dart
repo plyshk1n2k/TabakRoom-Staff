@@ -1,15 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:tabakroom_staff/widgets/custom_elevated_button.dart';
 
 class FiltersBuilder extends StatefulWidget {
   final List<FiltersData> data;
+  final Future<void> Function()
+      onApply; // Указываем, что это асинхронная функция
 
-  const FiltersBuilder({super.key, required this.data});
+  const FiltersBuilder({super.key, required this.data, required this.onApply});
 
   @override
   _FilterBuilderState createState() => _FilterBuilderState();
 }
 
 class _FilterBuilderState extends State<FiltersBuilder> {
+  bool hasChanges = false;
+  late Map<String, dynamic> initialValues; // Храним начальные значения
+
+  @override
+  void initState() {
+    super.initState();
+    _saveInitialValues(); // Сохраняем начальные значения фильтров
+    _checkForChanges(); // Проверяем изменения
+  }
+
+  /// Сохраняем начальные значения фильтров
+  void _saveInitialValues() {
+    initialValues = {
+      for (var filter in widget.data) filter.label: filter.currentValue
+    };
+  }
+
+  /// Проверяем, изменились ли фильтры по сравнению с начальными значениями
+  void _checkForChanges() {
+    setState(() {
+      hasChanges = widget.data.any((filter) =>
+          filter.currentValue !=
+          initialValues[filter.label]); // Сравнение значений
+    });
+  }
+
   /// Метод для сброса всех фильтров
   void _resetFilters() {
     setState(() {
@@ -18,6 +47,11 @@ class _FilterBuilderState extends State<FiltersBuilder> {
         filter.updateValue(null);
       }
     });
+  }
+
+  void _handleApply() async {
+    await widget.onApply(); // Дожидаемся завершения функции
+    Navigator.pop(context);
   }
 
   @override
@@ -84,6 +118,7 @@ class _FilterBuilderState extends State<FiltersBuilder> {
                                       optionValue); // Устанавливаем новое значение
                                 }
                               });
+                              _checkForChanges();
                             },
                           );
                         }).toList(),
@@ -98,7 +133,14 @@ class _FilterBuilderState extends State<FiltersBuilder> {
               ),
             ),
             SizedBox(
-              height: 20,
+              height: 30,
+            ),
+            CustomElevatedButton(
+                onPressed: hasChanges ? _handleApply : null,
+                text: 'Применить параметры',
+                buttonType: ButtonType.primary),
+            SizedBox(
+              height: 10,
             ),
             TextButton(
               onPressed: _resetFilters,

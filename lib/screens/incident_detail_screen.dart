@@ -181,7 +181,7 @@ class IncidentDetailsPage extends StatelessWidget {
 
     if (result.isSuccess) {
       CustomSnackbar.show(context,
-          message: 'Инцидент успешно отмечен как проверенный',
+          message: 'Инцидент отмечен как проверенный',
           type: WidgetType.success);
       Navigator.of(context)
           .pop(true); // Возвращаемся назад после успешной проверки
