@@ -55,7 +55,7 @@ class CustomElevatedButton extends StatelessWidget {
         disabledBackgroundColor: getDisableButtonColor(),
         backgroundColor: getButtonColor(), // Цвет кнопки
         elevation: 4.0, // Тень кнопки
-        padding: EdgeInsets.all(12), // Внутренний отступ
+        padding: EdgeInsets.all(14), // Внутренний отступ
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0), // Скругление углов
         ),

@@ -195,7 +195,7 @@ class _SnackbarContentState extends State<_SnackbarContent>
                       widget.message,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

@@ -1,156 +1,161 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:tabakroom_staff/models/api_response.dart';
 import 'package:tabakroom_staff/services/app_preferences.dart';
 
 class ApiService {
   static final String? _baseUrl = dotenv.env['MODE'] == 'TEST'
       ? Platform.isAndroid
-          ? dotenv.env['TEST_BASE_URL_ANDROID'] // Для Android
+          ? dotenv.env['TEST_BASE_URL_ANDROID']
           : dotenv.env['TEST_BASE_URL']
-      : dotenv.env['PROD_BASE_URL']; // Для iOS
+      : dotenv.env['PROD_BASE_URL'];
+  // 🔹 Добавляем переменную для коллбэка выхода
+  static VoidCallback? onLogoutCallback;
 
-  // Получаем access токен
-  static Future<String?> _getToken() async {
-    return AppPreferences.getValue('access_token');
-  }
+  /// Получаем токен доступа
+  static Future<String?> _getToken() async =>
+      AppPreferences.getValue('access_token');
 
-  // Получаем refresh токен
-  static Future<String?> _getRefreshToken() async {
-    return AppPreferences.getValue('refresh_token');
-  }
+  /// Получаем refresh-токен
+  static Future<String?> _getRefreshToken() async =>
+      AppPreferences.getValue('refresh_token');
 
-  // Обновление access токена
-  static Future<bool> _refreshToken() async {
+  /// Автоматически обновляем токен, если истек
+  static Future<bool> _refreshToken({int retryCount = 1}) async {
+    if (retryCount > 1) return false; // 🔥 Предотвращаем бесконечные попытки
+
     final refreshToken = await _getRefreshToken();
+    if (refreshToken == null) {
+      onLogoutCallback?.call();
+      return false;
+    }
 
-    if (refreshToken == null) return false;
     final response = await http.post(
       Uri.parse('$_baseUrl/token/refresh/'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _getHeaders(),
       body: jsonEncode({'refresh': refreshToken}),
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      await AppPreferences.setValue('access_token', data['access']);
-      return true;
-    } else {
-      return false;
+      final data = _safeJsonDecode(response.body);
+      if (data != null && data.containsKey('access')) {
+        await AppPreferences.setValue('access_token', data['access']);
+        return true;
+      }
     }
+    return false;
   }
 
-  // Универсальный GET-запрос с автообновлением токена
-  static Future<dynamic> get(String endpoint,
-      {bool rethrowError = false}) async {
-    final stopwatch = Stopwatch()..start();
+  /// Проверяем статус пользователя (исключаем зацикливание)
+  static Future<bool> _checkUserStatus() async {
+    final response = await _sendHttpRequest<Map<String, dynamic>>(
+      method: 'GET',
+      endpoint: '/users/user-is-active/',
+      checkToken: false, // ❗ Отключаем проверку токена
+    );
 
+    return response.isSuccess && response.data?['is_active'] == true;
+  }
+
+  /// Универсальная обертка для запросов
+  static Future<ApiResponse<T>> _sendHttpRequest<T>({
+    required String method,
+    required String endpoint,
+    Map<String, dynamic>? body,
+    bool checkToken = false,
+  }) async {
     try {
-      var token = await _getToken();
-      var response = await http.get(
-        Uri.parse('$_baseUrl$endpoint'),
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 401) {
-        final refreshed = await _refreshToken();
-        if (refreshed) {
-          token = await _getToken();
-          response = await http.get(
-            Uri.parse('$_baseUrl$endpoint'),
-            headers: {
-              'Content-Type': 'application/json',
-              if (token != null) 'Authorization': 'Bearer $token',
-            },
-          );
-        } else {
-          throw Exception("Ошибка 401: Токен истёк и не удалось обновить.");
+      if (checkToken) {
+        bool isActive = await _checkUserStatus();
+        if (!isActive) {
+          onLogoutCallback?.call();
+          return ApiResponse.error("Доступ ограничен");
         }
       }
 
-      return _handleResponse(response);
-    } catch (e) {
-      debugPrint('Ошибка GET-запроса: $e');
-      if (rethrowError) {
-        rethrow;
+      String? token = await _getToken();
+      Uri url = Uri.parse('$_baseUrl$endpoint');
+      http.Response response;
+      if (method == 'POST') {
+        response = await http.post(url,
+            headers: _getHeaders(token), body: jsonEncode(body));
       } else {
-        return {'error': e.toString()};
+        response = await http.get(url, headers: _getHeaders(token));
       }
-    } finally {
-      stopwatch.stop();
-      debugPrint(
-          'GET-запрос на $endpoint занял ${stopwatch.elapsedMilliseconds} мс');
-    }
-  }
-
-  // Универсальный POST-запрос с автообновлением токена
-  static Future<dynamic> post(String endpoint, Map<String, dynamic> body,
-      {bool rethrowError = false}) async {
-    final stopwatch = Stopwatch()..start();
-
-    try {
-      var token = await _getToken();
-      var response = await http.post(
-        Uri.parse('$_baseUrl$endpoint'),
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(body),
-      );
 
       if (response.statusCode == 401) {
-        final refreshed = await _refreshToken();
-        if (refreshed) {
-          token = await _getToken();
-          response = await http.post(
-            Uri.parse('$_baseUrl$endpoint'),
-            headers: {
-              'Content-Type': 'application/json',
-              if (token != null) 'Authorization': 'Bearer $token',
-            },
-            body: jsonEncode(body),
-          );
+        final refreshToken = await _getRefreshToken();
+
+        if (refreshToken == null) {
+          return ApiResponse.error("Неверный логин или пароль");
         } else {
-          throw Exception("Ошибка 401: Токен истёк и не удалось обновить.");
+          final refreshed = await _refreshToken();
+          if (refreshed) {
+            token = await _getToken();
+            response = method == 'POST'
+                ? await http.post(url,
+                    headers: _getHeaders(token), body: jsonEncode(body))
+                : await http.get(url, headers: _getHeaders(token));
+          } else {
+            return ApiResponse.error(
+                "Ошибка 401: Токен истёк и не удалось обновить");
+          }
         }
       }
 
-      return _handleResponse(response);
+      return _handleResponse<T>(response);
+    } on SocketException {
+      return ApiResponse.error("Нет подключения к интернету");
+    } on TimeoutException {
+      return ApiResponse.error("Превышено время ожидания запроса");
     } catch (e) {
-      debugPrint('Ошибка POST-запроса: $e');
-      if (rethrowError) {
-        rethrow;
-      } else {
-        return {'error': e.toString()};
-      }
-    } finally {
-      stopwatch.stop();
-      debugPrint(
-          'POST-запрос на $endpoint занял ${stopwatch.elapsedMilliseconds} мс');
+      return ApiResponse.error(e.toString());
     }
   }
 
-  // Обработчик ответов сервера
-  static dynamic _handleResponse(http.Response response) {
-    final stopwatch = Stopwatch()..start();
+  /// Универсальный GET-запрос
+  static Future<ApiResponse<T>> get<T>(String endpoint,
+          {bool checkToken = true}) async =>
+      _sendHttpRequest<T>(
+          method: 'GET', endpoint: endpoint, checkToken: checkToken);
+
+  /// Универсальный POST-запрос
+  static Future<ApiResponse<T>> post<T>(
+          String endpoint, Map<String, dynamic> body,
+          {bool checkToken = true}) async =>
+      _sendHttpRequest<T>(
+          method: 'POST',
+          endpoint: endpoint,
+          body: body,
+          checkToken: checkToken);
+
+  /// Генерация заголовков с токеном
+  static Map<String, String> _getHeaders([String? token]) => {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      };
+
+  /// Обработка ответа от сервера
+  static ApiResponse<T> _handleResponse<T>(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      final decodedBody = utf8.decode(response.bodyBytes);
-      final result = jsonDecode(decodedBody);
-      stopwatch.stop();
-      debugPrint(
-          'Время декодирования ответа: ${stopwatch.elapsedMilliseconds} мс');
-      return result;
-    } else {
-      stopwatch.stop();
-      debugPrint(
-          'Ошибка обработки ответа заняла: ${stopwatch.elapsedMilliseconds} мс');
-      throw Exception('Ошибка ${response.statusCode}: ${response.body}');
+      final decodedData = _safeJsonDecode(response.body);
+      if (decodedData != null) {
+        return ApiResponse.success(decodedData as T);
+      }
+    }
+    return ApiResponse.error("Ошибка ${response.statusCode}: ${response.body}");
+  }
+
+  /// Безопасное декодирование JSON
+  static dynamic _safeJsonDecode(String source) {
+    try {
+      return jsonDecode(utf8.decode(source.runes.toList()));
+    } catch (e) {
+      return {'error': 'Ошибка обработки данных'};
     }
   }
 }

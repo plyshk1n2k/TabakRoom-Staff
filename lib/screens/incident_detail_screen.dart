@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:tabakroom_staff/models/bonus_transactions.dart';
 import 'package:tabakroom_staff/services/suspicious_transactions_service.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
-import 'package:tabakroom_staff/widgets/custom_snakbar.dart'; // Импорт вашего ApiService
+import 'package:tabakroom_staff/widgets/custom_snakbar.dart';
 
 class IncidentDetailsPage extends StatelessWidget {
   final String userName;
@@ -182,12 +182,15 @@ class IncidentDetailsPage extends StatelessWidget {
     if (result.isSuccess) {
       CustomSnackbar.show(context,
           message: 'Инцидент отмечен как проверенный',
-          type: WidgetType.success);
+          type: WidgetType.success,
+          position: SnackbarPosition.top);
       Navigator.of(context)
           .pop(true); // Возвращаемся назад после успешной проверки
     } else {
       CustomSnackbar.show(context,
-          message: 'Ошибка запроса, попробуйте позже', type: WidgetType.danger);
+          message: result.error ?? 'Ошибка запроса, попробуйте позже',
+          type: WidgetType.danger,
+          position: SnackbarPosition.top);
     }
   }
 }

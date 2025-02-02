@@ -4,7 +4,9 @@ import 'package:tabakroom_staff/models/product_categories.dart';
 import 'package:tabakroom_staff/models/product_purchase_priority.dart';
 import 'package:tabakroom_staff/models/warehouse.dart';
 import 'package:tabakroom_staff/services/purchase_priority_service.dart';
+import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/widgets/bottom_sheet.dart';
+import 'package:tabakroom_staff/widgets/custom_snakbar.dart';
 import 'package:tabakroom_staff/widgets/filters_builder.dart';
 import 'package:tabakroom_staff/widgets/product_card.dart'; // Убедись, что MenuCard импортирован
 
@@ -88,6 +90,10 @@ class _LowStockScreenState extends State<LowStockScreen> {
       } else {
         data = [];
         dataIsLoaded = true;
+        CustomSnackbar.show(context,
+            message: response.error ?? 'Ошибка получения данных',
+            type: WidgetType.danger,
+            position: SnackbarPosition.top);
       }
     });
   }

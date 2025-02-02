@@ -69,7 +69,9 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             const SizedBox(height: 40),
             Image.asset(
-              'assets/images/splash_image.png',
+              Theme.of(context).brightness == Brightness.dark
+                  ? 'assets/images/splash_image.png'
+                  : 'assets/images/splash_image_black.png',
               height: 150,
             ),
             const SizedBox(height: 20),
@@ -103,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               onChanged: (value) => _updateFormState(),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 15),
             SizedBox(
                 width: double.infinity,
                 child: CustomElevatedButton(

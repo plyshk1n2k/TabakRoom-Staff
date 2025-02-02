@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tabakroom_staff/screens/login_screen.dart';
 import 'package:tabakroom_staff/screens/suspicious_transactions_screen.dart';
 import 'package:tabakroom_staff/screens/low_stock_screen.dart';
+import 'package:tabakroom_staff/services/auth_service.dart';
 import 'package:tabakroom_staff/themes/theme_provider.dart';
 import 'package:tabakroom_staff/widgets/menu_card.dart';
 
@@ -28,13 +30,26 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
           icon: Icon(
             _isDarkMode
-                ? Icons.nightlight_round
-                : Icons.wb_sunny, // Иконка меняется в зависимости от темы
+                ? Icons.nightlight_round_outlined
+                : Icons
+                    .wb_sunny_outlined, // Иконка меняется в зависимости от темы
           ),
           onPressed: () async {
             await themeProvider.toggleTheme();
           }, // Переключение темы при нажатии
         ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                AuthService.logout(); // Выход пользователя
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                  (route) => false, // Удаляем все предыдущие страницы
+                );
+              },
+              icon: Icon(Icons.exit_to_app_outlined))
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

@@ -5,6 +5,7 @@ import 'package:tabakroom_staff/screens/incident_detail_screen.dart';
 import 'package:tabakroom_staff/services/suspicious_transactions_service.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/widgets/bottom_sheet.dart';
+import 'package:tabakroom_staff/widgets/custom_snakbar.dart';
 import 'package:tabakroom_staff/widgets/filters_builder.dart';
 import 'package:tabakroom_staff/widgets/skeleton.dart';
 
@@ -44,6 +45,10 @@ class _SuspiciousTransactionsScreenState
         data = response.data!;
       } else {
         data = [];
+        CustomSnackbar.show(context,
+            message: response.error ?? 'Ошибка получения данных',
+            type: WidgetType.danger,
+            position: SnackbarPosition.top);
       }
       dataIsLoaded = true;
     });

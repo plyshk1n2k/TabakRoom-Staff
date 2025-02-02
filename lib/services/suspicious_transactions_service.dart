@@ -1,69 +1,44 @@
 import 'package:tabakroom_staff/models/api_response.dart';
-import 'package:flutter/foundation.dart';
 import 'package:tabakroom_staff/models/detect_suspicious_bonus.dart';
 import '../services/api_service.dart';
 
 class SuspiciousTransactionsService {
+  /// Получение списка подозрительных транзакций с учетом фильтра
   static Future<ApiResponse<List<DetectSuspiciousBonus>>>
       fetchSuspiciousTransactions({
     FilterOptions? filter,
   }) async {
-    try {
-      // Преобразуем фильтр в Map и удаляем пустые параметры
-      final Map<String, dynamic> queryParams = filter
-              ?.toJson()
-              .map((key, value) =>
-                  MapEntry(key, value.toString())) // Приведение к строке
-              .cast<String, String>() ??
-          {};
+    final queryParams = filter
+            ?.toJson()
+            .map((key, value) => MapEntry(key, value.toString()))
+            .cast<String, String>() ??
+        {};
 
-      // Удаляем параметры с пустыми значениями
-      queryParams.removeWhere((key, value) => value.isEmpty);
+    queryParams.removeWhere((key, value) => value.isEmpty);
 
-      // Генерация строки запроса с параметрами
-      final uri = Uri.parse('/detect-bonus-suspicious/')
-          .replace(queryParameters: queryParams);
+    final uri = Uri.parse('/detect-bonus-suspicious/')
+        .replace(queryParameters: queryParams);
 
-      // Запрос с параметрами
-      final response =
-          await ApiService.get(uri.toString(), rethrowError: false);
+    final response = await ApiService.get<List<dynamic>>(uri.toString());
 
-      return ApiResponse.success((response as List)
-          .map((item) => DetectSuspiciousBonus.fromJson(item))
-          .toList());
-    } catch (e) {
-      debugPrint('Ошибка получения данных: $e');
-      return ApiResponse.error('Ошибка получения данных!');
-    }
+    return response.isSuccess
+        ? ApiResponse.success(response.data!
+            .map((item) => DetectSuspiciousBonus.fromJson(item))
+            .toList())
+        : ApiResponse.error(response.error);
   }
 
-  static Future<ApiResponse> markIncidentReviewed({
+  /// Отметка инцидента как проверенного
+  static Future<ApiResponse<Map<String, dynamic>>> markIncidentReviewed({
     required int incidentId,
   }) async {
-    try {
-      // Формируем тело запроса
-      final Map<String, dynamic> requestBody = {
-        'incident_id': incidentId,
-      };
+    final requestBody = {'incident_id': incidentId};
 
-      // Отправляем POST-запрос
-      final response = await ApiService.post(
-        '/incidents/review/', // Укажите правильный путь к вашему API
-        requestBody,
-        rethrowError: false,
-      );
+    final response = await ApiService.post<Map<String, dynamic>>(
+        '/incidents/review/', requestBody);
 
-      if (response != null && response['message'] != null) {
-        debugPrint('Инцидент успешно отмечен как проверенный.');
-        return ApiResponse.success(response);
-      } else {
-        debugPrint('Не удалось отметить инцидент: ${response.toString()}');
-        return ApiResponse.error(
-            'Ошибка при отметке инцидента как проверенного.');
-      }
-    } catch (e) {
-      debugPrint('Ошибка запроса: $e');
-      return ApiResponse.error('Ошибка запроса.');
-    }
+    return response.isSuccess
+        ? ApiResponse.success(response.data!)
+        : ApiResponse.error(response.error);
   }
 }
