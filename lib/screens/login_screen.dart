@@ -39,7 +39,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (response.isSuccess) {
       CustomSnackbar.show(context,
-          message: 'Успешный вход', type: WidgetType.success);
+          message: 'Успешный вход',
+          type: WidgetType.success,
+          position: SnackbarPosition.top);
 
       Navigator.pushReplacement(
         context,
@@ -48,7 +50,8 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       CustomSnackbar.show(context,
           message: response.error ?? "Ошибка авторизации",
-          type: WidgetType.danger);
+          type: WidgetType.danger,
+          position: SnackbarPosition.top);
     }
   }
 
