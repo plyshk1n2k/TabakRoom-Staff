@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tabakroom_staff/themes/theme_data.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   final String productName;
@@ -95,6 +96,33 @@ class ProductDetailsScreen extends StatelessWidget {
               content: priority,
               icon: Icons.priority_high_outlined,
             ),
+
+            // Карточка поставщиков с ценами
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Цены',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          color: AppColors.secondary,
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5)),
+                          child: Text('1'),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            )
           ],
         ),
       ),

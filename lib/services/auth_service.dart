@@ -14,19 +14,21 @@ class AuthService {
   }
 
   /// Получение access-токена
-  static Future<String?> getToken() async => AppPreferences.getValue(_tokenKey);
+  static Future<String?> getToken() async =>
+      await AppPreferences.getValue(_tokenKey);
 
   /// Получение refresh-токена
   static Future<String?> getRefreshToken() async =>
-      AppPreferences.getValue(_refreshTokenKey);
+      await AppPreferences.getValue(_refreshTokenKey);
 
   /// Сохранение access-токена
-  static Future<void> saveToken(String token) async =>
-      AppPreferences.setValue(_tokenKey, token);
+  static Future<void> saveToken(String token) async {
+    await AppPreferences.setValue(_tokenKey, token);
+  }
 
   /// Сохранение refresh-токена
   static Future<void> saveRefreshToken(String token) async =>
-      AppPreferences.setValue(_refreshTokenKey, token);
+      await AppPreferences.setValue(_refreshTokenKey, token);
 
   /// Выход из системы (удаление токенов)
   static Future<void> logout() async {

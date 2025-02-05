@@ -133,8 +133,8 @@ class FilterOptions {
       _priorityLevel == null && _warehouseId == null && _groupId == null;
 
   // Приватный метод для автоматического сохранения изменений
-  void _saveToPreferences() {
-    AppPreferences.setValue('product_filter_options', toJson());
+  Future<void> _saveToPreferences() async {
+    await AppPreferences.setValue('product_filter_options', toJson());
   }
 
   void reset() {

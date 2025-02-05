@@ -18,11 +18,11 @@ class ApiService {
 
   /// Получаем токен доступа
   static Future<String?> _getToken() async =>
-      AppPreferences.getValue('access_token');
+      await AppPreferences.getValue('access_token');
 
   /// Получаем refresh-токен
   static Future<String?> _getRefreshToken() async =>
-      AppPreferences.getValue('refresh_token');
+      await AppPreferences.getValue('refresh_token');
 
   /// Автоматически обновляем токен, если истек
   static Future<bool> _refreshToken({int retryCount = 1}) async {
@@ -142,12 +142,14 @@ class ApiService {
   /// Обработка ответа от сервера
   static ApiResponse<T> _handleResponse<T>(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      final decodedData = _safeJsonDecode(response.body);
+      final decodedData = _safeJsonDecode(utf8
+          .decode(response.bodyBytes)); // 🔥 Принудительно декодируем в UTF-8
       if (decodedData != null) {
         return ApiResponse.success(decodedData as T);
       }
     }
-    return ApiResponse.error("Ошибка ${response.statusCode}: ${response.body}");
+    return ApiResponse.error(
+        "Ошибка ${response.statusCode}: ${utf8.decode(response.bodyBytes)}"); // 🔥 Декодируем текст ошибки
   }
 
   /// Безопасное декодирование JSON

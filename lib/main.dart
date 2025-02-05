@@ -46,7 +46,6 @@ class TabakRoomApp extends StatelessWidget {
         darkTheme: CustomTheme.darkTheme, // Тёмная тема
         themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
         navigatorKey: navigatorKey, // 🔹 Подключаем глобальный навигатор
-
         routes: {
           '/login': (context) => LoginScreen(),
         },

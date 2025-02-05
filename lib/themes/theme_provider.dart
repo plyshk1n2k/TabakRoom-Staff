@@ -21,7 +21,7 @@ class ThemeProvider with ChangeNotifier {
   // Метод для переключения темы и сохранения в SharedPreferences
   Future<void> toggleTheme() async {
     _isDarkMode = !_isDarkMode;
-    AppPreferences.setValue(
+    await AppPreferences.setValue(
         'isDarkMode', _isDarkMode); // Сохраняем новый выбор темы
     notifyListeners(); // Уведомление слушателей о том, что тема изменилась
   }

@@ -102,8 +102,8 @@ class FilterOptions {
   bool get isEmpty => _isResolved == null;
 
   // Приватный метод для автоматического сохранения изменений
-  void _saveToPreferences() {
-    AppPreferences.setValue('transactions_filter_options', toJson());
+  Future<void> _saveToPreferences() async {
+    await AppPreferences.setValue('transactions_filter_options', toJson());
   }
 
   // Метод для обновления значений
