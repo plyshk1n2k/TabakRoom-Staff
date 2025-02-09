@@ -61,86 +61,98 @@ class ProductPurchasePriority {
 }
 
 class FilterOptions {
-  String? _priorityLevel; // Закрытое поле для уровня приоритета
-  int? _warehouseId; // Закрытое поле для ID склада
-  int? _groupId; // Закрытое поле для ID группы
+  final String sectionApp; // Описание раздела приложения
 
-  // Геттеры для доступа к значениям
-  String? get priorityLevel => _priorityLevel;
-  int? get warehouseId => _warehouseId;
-  int? get groupId => _groupId;
+  List<String>? _priorityLevel; // Теперь список
+  List<int>? _warehouseId; // Теперь список
+  List<int>? _groupId; // Теперь список
+
+  // Геттеры
+  List<String>? get priorityLevel => _priorityLevel;
+  List<int>? get warehouseId => _warehouseId;
+  List<int>? get groupId => _groupId;
 
   // Сеттеры с автоматическим сохранением
-  set priorityLevel(String? value) {
+  set priorityLevel(List<String>? value) {
     _priorityLevel = value;
     _saveToPreferences();
   }
 
-  set warehouseId(int? value) {
+  set warehouseId(List<int>? value) {
     _warehouseId = value;
     _saveToPreferences();
   }
 
-  set groupId(int? value) {
+  set groupId(List<int>? value) {
     _groupId = value;
     _saveToPreferences();
   }
 
   // Конструктор
   FilterOptions({
-    String? priorityLevel,
-    int? warehouseId,
-    int? groupId,
-  })  : _priorityLevel = priorityLevel,
-        _warehouseId = warehouseId,
-        _groupId = groupId;
+    required this.sectionApp,
+    List<String>? priorityLevel,
+    List<int>? warehouseId,
+    List<int>? groupId,
+  })  : _priorityLevel = priorityLevel ?? [],
+        _warehouseId = warehouseId ?? [],
+        _groupId = groupId ?? [];
 
   // Конструктор из JSON
-  factory FilterOptions.fromJson(Map<String, dynamic> json) {
+  factory FilterOptions.fromJson(String sectionApp, Map<String, dynamic> json) {
     return FilterOptions(
-      priorityLevel: json['priority_level'],
-      warehouseId: json['warehouse_id'],
-      groupId: json['group_id'],
+      sectionApp: sectionApp,
+      priorityLevel: json['priority_level'] != null
+          ? List<String>.from(json['priority_level'])
+          : [],
+      warehouseId: json['warehouse_id'] != null
+          ? List<int>.from(json['warehouse_id'])
+          : [],
+      groupId: json['group_id'] != null ? List<int>.from(json['group_id']) : [],
     );
   }
 
-  // Асинхронный фабричный конструктор для загрузки данных из SharedPreferences
-  static Future<FilterOptions> loadFromPreferences() async {
-    final json = await AppPreferences.getValue<Map<String, dynamic>>(
-        'product_filter_options');
+  // Загрузка данных из SharedPreferences
+  static Future<FilterOptions> loadFromPreferences(String sectionApp) async {
+    final key = 'filter_options_$sectionApp';
+    final json = await AppPreferences.getValue<Map<String, dynamic>>(key);
     if (json != null) {
-      return FilterOptions.fromJson(json);
+      return FilterOptions.fromJson(sectionApp, json);
     }
-    return FilterOptions(); // Возвращаем объект с дефолтными значениями
+    return FilterOptions(sectionApp: sectionApp);
   }
 
-  // Метод для сохранения фильтров в SharedPreferences
+  // Сохранение фильтров в SharedPreferences
   Future<void> saveToPreferences() async {
-    await AppPreferences.setValue('product_filter_options', toJson());
+    final key = 'filter_options_$sectionApp';
+    await AppPreferences.setValue(key, toJson());
   }
 
   // Преобразование в JSON
   Map<String, dynamic> toJson() {
     return {
-      if (_priorityLevel != null) 'priority_level': _priorityLevel,
-      if (_warehouseId != null) 'warehouse_id': _warehouseId,
-      if (_groupId != null) 'group_id': _groupId,
+      'priority_level': _priorityLevel ?? [],
+      'warehouse_id': _warehouseId ?? [],
+      'group_id': _groupId ?? [],
     };
   }
 
   // Проверка, пустой ли фильтр
   bool get isEmpty =>
-      _priorityLevel == null && _warehouseId == null && _groupId == null;
+      (_priorityLevel == null || _priorityLevel!.isEmpty) &&
+      (_warehouseId == null || _warehouseId!.isEmpty) &&
+      (_groupId == null || _groupId!.isEmpty);
 
-  // Приватный метод для автоматического сохранения изменений
+  // Автоматическое сохранение изменений
   Future<void> _saveToPreferences() async {
-    await AppPreferences.setValue('product_filter_options', toJson());
+    await saveToPreferences();
   }
 
+  // Сброс фильтров
   void reset() {
-    _priorityLevel = null; // Значение по умолчанию
-    _warehouseId = null; // Значение по умолчанию
-    _groupId = null; // Значение по умолчанию
-    _saveToPreferences(); // Сохраняем изменения
+    _priorityLevel = [];
+    _warehouseId = [];
+    _groupId = [];
+    _saveToPreferences();
   }
 }

@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:tabakroom_staff/models/api_response.dart';
-import 'package:tabakroom_staff/services/app_preferences.dart';
+import 'package:tabakroom_staff/services/auth_service.dart';
 
 class ApiService {
   static final String? _baseUrl = dotenv.env['MODE'] == 'TEST'
@@ -16,19 +16,11 @@ class ApiService {
   // 🔹 Добавляем переменную для коллбэка выхода
   static VoidCallback? onLogoutCallback;
 
-  /// Получаем токен доступа
-  static Future<String?> _getToken() async =>
-      await AppPreferences.getValue('access_token');
-
-  /// Получаем refresh-токен
-  static Future<String?> _getRefreshToken() async =>
-      await AppPreferences.getValue('refresh_token');
-
   /// Автоматически обновляем токен, если истек
   static Future<bool> _refreshToken({int retryCount = 1}) async {
     if (retryCount > 1) return false; // 🔥 Предотвращаем бесконечные попытки
 
-    final refreshToken = await _getRefreshToken();
+    final refreshToken = await AuthService.getRefreshToken();
     if (refreshToken == null) {
       onLogoutCallback?.call();
       return false;
@@ -43,7 +35,7 @@ class ApiService {
     if (response.statusCode == 200) {
       final data = _safeJsonDecode(response.body);
       if (data != null && data.containsKey('access')) {
-        await AppPreferences.setValue('access_token', data['access']);
+        await AuthService.saveToken(data['access']);
         return true;
       }
     }
@@ -77,7 +69,7 @@ class ApiService {
         }
       }
 
-      String? token = await _getToken();
+      String? token = await AuthService.getToken();
       Uri url = Uri.parse('$_baseUrl$endpoint');
       http.Response response;
       if (method == 'POST') {
@@ -88,14 +80,14 @@ class ApiService {
       }
 
       if (response.statusCode == 401) {
-        final refreshToken = await _getRefreshToken();
+        final refreshToken = await AuthService.getRefreshToken();
 
         if (refreshToken == null) {
           return ApiResponse.error("Неверный логин или пароль");
         } else {
           final refreshed = await _refreshToken();
           if (refreshed) {
-            token = await _getToken();
+            token = await AuthService.getToken();
             response = method == 'POST'
                 ? await http.post(url,
                     headers: _getHeaders(token), body: jsonEncode(body))
@@ -141,22 +133,29 @@ class ApiService {
 
   /// Обработка ответа от сервера
   static ApiResponse<T> _handleResponse<T>(http.Response response) {
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final decodedData = _safeJsonDecode(utf8
-          .decode(response.bodyBytes)); // 🔥 Принудительно декодируем в UTF-8
-      if (decodedData != null) {
-        return ApiResponse.success(decodedData as T);
+    try {
+      // ✅ Принудительно декодируем в UTF-8
+      final decodedBody = utf8.decode(response.bodyBytes);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final decodedData = _safeJsonDecode(decodedBody);
+        if (decodedData != null) {
+          return ApiResponse.success(decodedData as T);
+        }
       }
+
+      return ApiResponse.error(
+          "Ошибка ${response.statusCode}: $decodedBody"); // ✅ Декодируем текст ошибки корректно
+    } catch (e) {
+      return ApiResponse.error("Ошибка обработки ответа: $e");
     }
-    return ApiResponse.error(
-        "Ошибка ${response.statusCode}: ${utf8.decode(response.bodyBytes)}"); // 🔥 Декодируем текст ошибки
   }
 
   /// Безопасное декодирование JSON
   static dynamic _safeJsonDecode(String source) {
     try {
-      return jsonDecode(utf8.decode(source.runes.toList()));
+      return jsonDecode(source); // ✅ Декодируем без лишних преобразований
     } catch (e) {
+      debugPrint("❌ Ошибка декодирования JSON: $e");
       return {'error': 'Ошибка обработки данных'};
     }
   }

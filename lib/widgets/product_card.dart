@@ -67,7 +67,9 @@ class _ProductCardState extends State<ProductCard> {
           context,
           MaterialPageRoute(
               builder: (context) => ProductDetailsScreen(
+                  productId: widget.productPriority!.product.id,
                   productName: widget.productPriority!.product.name,
+                  warehouseId: widget.productPriority!.warehouse.id,
                   warehouse: widget.productPriority!.warehouse.name,
                   salesLast7Days: widget.productPriority!.totalSalesLast7Days,
                   salesLast30Days: widget.productPriority!.totalSalesLast30Days,

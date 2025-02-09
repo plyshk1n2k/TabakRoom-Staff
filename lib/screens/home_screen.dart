@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tabakroom_staff/screens/create_order_screen.dart';
 import 'package:tabakroom_staff/screens/login_screen.dart';
 import 'package:tabakroom_staff/screens/suspicious_transactions_screen.dart';
 import 'package:tabakroom_staff/screens/low_stock_screen.dart';
@@ -57,17 +58,22 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             MenuCard(
+              icon: Icons.inventory_2_outlined,
+              title: 'Анализ остатков',
+              description: 'Приоритет закупок',
+              screen: const LowStockScreen(),
+            ),
+            MenuCard(
               icon: Icons.warning_amber_rounded,
               title: 'Подозрительные транзакции',
               description: 'Анализ операций с бонусами',
               screen: const SuspiciousTransactionsScreen(),
             ),
-            const SizedBox(height: 20),
             MenuCard(
-              icon: Icons.inventory_2_outlined,
-              title: 'Анализ остатков',
-              description: 'Приоритет закупок',
-              screen: const LowStockScreen(),
+              icon: Icons.assignment_add,
+              title: 'Формирование заказа',
+              description: 'Помощь в составлении заказа',
+              screen: const CreateOrderScreen(),
             ),
           ],
         ),

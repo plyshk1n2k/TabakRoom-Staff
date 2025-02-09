@@ -56,25 +56,32 @@ class _SuspiciousTransactionsScreenState
 
   void showFilters() {
     CustomBottomSheet.show(
-        context: context,
-        content: FiltersBuilder(
-            onApply: () async {
-              loadData();
+      context: context,
+      content: FiltersBuilder(
+        onApply: () async {
+          loadData();
+        },
+        data: [
+          FiltersData(
+            label: 'Статус проверки',
+            filterValues: [
+              FilterValues(label: 'Не проверенные', value: false),
+              FilterValues(label: 'Проверенные', value: true),
+            ],
+            currentValues: filterParams.isResolved != null
+                ? [filterParams.isResolved!] // ✅ Преобразуем в список
+                : [],
+            onValueChange: (newValues) {
+              setState(() {
+                filterParams.isResolved =
+                    newValues.isNotEmpty ? newValues.first : null;
+              });
             },
-            data: [
-              FiltersData(
-                  label: 'Статус проверки',
-                  filterValues: [
-                    FilterValues(label: 'Не проверенные', value: false),
-                    FilterValues(label: 'Проверенные', value: true)
-                  ],
-                  currentValue: filterParams.isResolved,
-                  onValueChange: (newValue) {
-                    setState(() {
-                      filterParams.isResolved = newValue;
-                    });
-                  })
-            ]));
+            isMultiSelect: false, // ✅ Одиночный выбор
+          ),
+        ],
+      ),
+    );
   }
 
   @override

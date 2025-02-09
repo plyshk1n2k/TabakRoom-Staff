@@ -81,6 +81,17 @@ class CustomTheme {
         borderRadius: BorderRadius.circular(12),
       ),
     ),
+    checkboxTheme: CheckboxThemeData(
+      checkColor:
+          WidgetStateProperty.all(AppColors.backgroundLight), // Белая галочка
+      fillColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return AppColors.primary; // Синий фон, если чекбокс выбран
+        }
+        return Colors.transparent; // Прозрачный фон, если не выбран
+      }),
+      side: BorderSide(color: AppColors.backgroundDark, width: 2),
+    ),
     cardTheme: CardTheme(
       color: AppColors.backgroundLight,
       elevation: 5, // Высота тени
@@ -237,6 +248,18 @@ class CustomTheme {
             fontWeight: FontWeight.bold),
         bodyMedium: TextStyle(color: AppColors.textLight, fontSize: 16),
         bodySmall: TextStyle(color: AppColors.textLight, fontSize: 14),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        checkColor:
+            WidgetStateProperty.all(AppColors.backgroundLight), // Белая галочка
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.primary; // Синий фон, если чекбокс выбран
+          }
+          return Colors.transparent; // Прозрачный фон, если не выбран
+        }),
+
+        side: BorderSide(color: AppColors.backgroundLight, width: 2),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.defaultElementForDark,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tabakroom_staff/services/app_preferences.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/services/auth_service.dart';
 import 'login_screen.dart';
@@ -18,6 +19,7 @@ class _AuthCheckState extends State<AuthCheck> {
   @override
   void initState() {
     super.initState();
+    // AppPreferences.clear();
     //AuthService.logout();
     _checkAuth();
   }

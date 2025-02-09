@@ -9,26 +9,26 @@ class AuthService {
 
   /// Проверка, авторизован ли пользователь
   static Future<bool> isLoggedIn() async {
-    final token = await AppPreferences.getValue(_tokenKey);
+    final String? token = await AppPreferences.getValue<String>(_tokenKey);
     return token != null && token.isNotEmpty;
   }
 
   /// Получение access-токена
   static Future<String?> getToken() async =>
-      await AppPreferences.getValue(_tokenKey);
+      await AppPreferences.getValue<String>(_tokenKey);
 
   /// Получение refresh-токена
   static Future<String?> getRefreshToken() async =>
-      await AppPreferences.getValue(_refreshTokenKey);
+      await AppPreferences.getValue<String>(_refreshTokenKey);
 
   /// Сохранение access-токена
   static Future<void> saveToken(String token) async {
-    await AppPreferences.setValue(_tokenKey, token);
+    await AppPreferences.setValue<String>(_tokenKey, token);
   }
 
   /// Сохранение refresh-токена
   static Future<void> saveRefreshToken(String token) async =>
-      await AppPreferences.setValue(_refreshTokenKey, token);
+      await AppPreferences.setValue<String>(_refreshTokenKey, token);
 
   /// Выход из системы (удаление токенов)
   static Future<void> logout() async {

@@ -19,9 +19,9 @@ class LowStockScreen extends StatefulWidget {
 
 class _LowStockScreenState extends State<LowStockScreen> {
   List<ProductPurchasePriority> data = []; // ✅ Инициализируем пустым списком
-  List<FilterValues<dynamic>> filterPriorities = [];
-  List<FilterValues<dynamic>> filterWarehouses = [];
-  List<FilterValues<dynamic>> filterProductCategories = [];
+  List<FilterValues> filterPriorities = [];
+  List<FilterValues> filterWarehouses = [];
+  List<FilterValues> filterProductCategories = [];
   late FilterOptions filterParams;
   bool dataIsLoaded = false;
 
@@ -32,17 +32,24 @@ class _LowStockScreenState extends State<LowStockScreen> {
   }
 
   void loadData() async {
-    filterParams = await FilterOptions.loadFromPreferences();
+    filterParams = await FilterOptions.loadFromPreferences('low_stock_screen');
     setState(() {
       dataIsLoaded = false;
     });
+
+    // ✅ Гарантируем правильный тип после загрузки
+    filterParams.priorityLevel =
+        List<String>.from(filterParams.priorityLevel ?? []);
+    filterParams.warehouseId = List<int>.from(filterParams.warehouseId ?? []);
+    filterParams.groupId = List<int>.from(filterParams.groupId ?? []);
 
     final ApiResponse<List<String>> responsePriorities =
         await PurchasePriorityService.fetchPriorities();
     setState(() {
       if (responsePriorities.isSuccess && responsePriorities.data != null) {
         filterPriorities = responsePriorities.data!
-            .map((element) => FilterValues(label: element, value: element))
+            .map((element) =>
+                FilterValues(label: element, value: element)) // ❌ Без <String>
             .toList();
       }
     });
@@ -51,10 +58,10 @@ class _LowStockScreenState extends State<LowStockScreen> {
         await PurchasePriorityService.fetchWarehouses();
 
     setState(() {
-      if (responseWarehouses.isSuccess && responsePriorities.data != null) {
+      if (responseWarehouses.isSuccess && responseWarehouses.data != null) {
         filterWarehouses = responseWarehouses.data!
-            .map((element) =>
-                FilterValues(label: element.name, value: element.id))
+            .map((element) => FilterValues(
+                label: element.name, value: element.id)) // ❌ Без <int>
             .toList();
       }
     });
@@ -66,8 +73,8 @@ class _LowStockScreenState extends State<LowStockScreen> {
       if (responseProductCategories.isSuccess &&
           responseProductCategories.data != null) {
         filterProductCategories = responseProductCategories.data!
-            .map((element) =>
-                FilterValues(label: element.name, value: element.id))
+            .map((element) => FilterValues(
+                label: element.name, value: element.id)) // ❌ Без <int>
             .toList();
       }
     });
@@ -79,9 +86,10 @@ class _LowStockScreenState extends State<LowStockScreen> {
     setState(() {
       dataIsLoaded = false;
     });
+
     final ApiResponse<List<ProductPurchasePriority>> response =
         await PurchasePriorityService.fetchPrioritiesProducts(
-            filter: filterParams);
+            filter: filterParams); // ✅ filterParams уже содержит `List<T>`
 
     setState(() {
       if (response.isSuccess && response.data != null) {
@@ -100,40 +108,51 @@ class _LowStockScreenState extends State<LowStockScreen> {
 
   void showFilters() async {
     CustomBottomSheet.show(
-        context: context,
-        content: FiltersBuilder(
-            onApply: () async {
-              loadProducts();
+      context: context,
+      content: FiltersBuilder(
+        onApply: () async {
+          loadProducts();
+        },
+        data: [
+          FiltersData(
+            label: 'Приоритет',
+            filterValues: filterPriorities,
+            currentValues: List<String>.from(
+                filterParams.priorityLevel ?? []), // Явно String
+            onValueChange: (newValues) {
+              setState(() {
+                filterParams.priorityLevel = List<String>.from(newValues);
+              });
             },
-            data: [
-              FiltersData(
-                  label: 'Приоритет',
-                  filterValues: filterPriorities,
-                  currentValue: filterParams.priorityLevel,
-                  onValueChange: (newValue) {
-                    setState(() {
-                      filterParams.priorityLevel = newValue;
-                    });
-                  }),
-              FiltersData(
-                  label: 'Склад',
-                  filterValues: filterWarehouses,
-                  currentValue: filterParams.warehouseId,
-                  onValueChange: (newValue) {
-                    setState(() {
-                      filterParams.warehouseId = newValue;
-                    });
-                  }),
-              FiltersData(
-                  label: 'Группы товаров',
-                  filterValues: filterProductCategories,
-                  currentValue: filterParams.groupId,
-                  onValueChange: (newValue) {
-                    setState(() {
-                      filterParams.groupId = newValue;
-                    });
-                  }),
-            ]));
+            isMultiSelect: false,
+          ),
+          FiltersData(
+            label: 'Склад',
+            filterValues: filterWarehouses,
+            currentValues:
+                List<int>.from(filterParams.warehouseId ?? []), // Явно int
+            onValueChange: (newValues) {
+              setState(() {
+                filterParams.warehouseId = List<int>.from(newValues);
+              });
+            },
+            isMultiSelect: false,
+          ),
+          FiltersData(
+            label: 'Группы товаров',
+            filterValues: filterProductCategories,
+            currentValues:
+                List<int>.from(filterParams.groupId ?? []), // Явно String
+            onValueChange: (newValues) {
+              setState(() {
+                filterParams.groupId = List<int>.from(newValues);
+              });
+            },
+            isMultiSelect: false, // ✅ Разрешаем множественный выбор
+          ),
+        ],
+      ),
+    );
   }
 
   @override

@@ -13,7 +13,7 @@ class ThemeProvider with ChangeNotifier {
 
   // Метод для загрузки предпочтений о теме (светлая/тёмная) из SharedPreferences
   Future<void> _loadThemePreference() async {
-    _isDarkMode = await AppPreferences.getValue('isDarkMode') ??
+    _isDarkMode = await AppPreferences.getValue<bool>('isDarkMode') ??
         true; // Если нет предпочтений, по умолчанию светлая тема
     notifyListeners(); // Уведомление слушателей о том, что тема изменилась
   }
@@ -21,7 +21,7 @@ class ThemeProvider with ChangeNotifier {
   // Метод для переключения темы и сохранения в SharedPreferences
   Future<void> toggleTheme() async {
     _isDarkMode = !_isDarkMode;
-    await AppPreferences.setValue(
+    await AppPreferences.setValue<bool>(
         'isDarkMode', _isDarkMode); // Сохраняем новый выбор темы
     notifyListeners(); // Уведомление слушателей о том, что тема изменилась
   }

@@ -1,12 +1,12 @@
 class Product {
-  final int? id; // 🔄 Сделали id необязательным
+  final int id;
   final String name;
 
-  Product({this.id, required this.name});
+  Product({required this.id, required this.name});
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'], // Может быть null
+      id: json['id'],
       name: json['name'] ??
           'Неизвестный товар', // Подстраховка, если name отсутствует
     );

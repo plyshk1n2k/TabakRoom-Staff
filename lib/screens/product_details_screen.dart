@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:tabakroom_staff/models/api_response.dart';
+import 'package:tabakroom_staff/models/top_supplier_price.dart';
+import 'package:tabakroom_staff/services/purchase_priority_service.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
+import 'package:tabakroom_staff/widgets/custom_snakbar.dart';
+import 'package:tabakroom_staff/widgets/skeleton.dart';
 
-class ProductDetailsScreen extends StatelessWidget {
+class ProductDetailsScreen extends StatefulWidget {
+  final int productId;
   final String productName;
+  final int warehouseId;
   final String warehouse;
   final int salesLast7Days;
   final int salesLast30Days;
@@ -13,7 +21,9 @@ class ProductDetailsScreen extends StatelessWidget {
 
   const ProductDetailsScreen({
     Key? key,
+    required this.productId,
     required this.productName,
+    required this.warehouseId,
     required this.warehouse,
     required this.salesLast7Days,
     required this.salesLast30Days,
@@ -22,6 +32,49 @@ class ProductDetailsScreen extends StatelessWidget {
     required this.stockCoverageDays,
     required this.priority,
   }) : super(key: key);
+
+  @override
+  _ProductDetailsScreenState createState() => _ProductDetailsScreenState();
+}
+
+class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
+  List<TopSupplierPrice> supplierPrices = [];
+  bool dataIsLoaded = false;
+  double? minPrice; // 🔹 Минимальная цена
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  void loadData() async {
+    setState(() {
+      dataIsLoaded = false;
+    });
+
+    final ApiResponse<List<TopSupplierPrice>> response =
+        await PurchasePriorityService.fetchTopPriceSupplier(widget.productId,
+            warehouseId: widget.warehouseId);
+
+    setState(() {
+      if (response.isSuccess && response.data != null) {
+        supplierPrices = response.data!;
+        if (supplierPrices.isNotEmpty) {
+          minPrice = supplierPrices
+              .map((e) => e.price)
+              .reduce((a, b) => a < b ? a : b);
+        }
+      } else {
+        supplierPrices = [];
+        CustomSnackbar.show(context,
+            message: response.error ?? 'Ошибка получения цен от поставщиков',
+            type: WidgetType.danger,
+            position: SnackbarPosition.top);
+      }
+      dataIsLoaded = true;
+    });
+  }
 
   String _pluralizeDay(int days) {
     if (days % 10 == 1 && days % 100 != 11) {
@@ -43,87 +96,120 @@ class ProductDetailsScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Название товара
-            Text(
-              productName,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Карточка с данными склада
-            _buildInfoCard(
-              context,
-              title: 'Склад',
-              content: warehouse,
-              icon: Icons.warehouse_outlined,
-            ),
-
-            // Карточка с данными по продажам
-            _buildInfoCard(
-              context,
-              title: 'Продажи',
-              content:
-                  '7 дней: $salesLast7Days\n30 дней: $salesLast30Days\n180 дней: $salesLast180Days',
-              icon: Icons.bar_chart_outlined,
-            ),
-
-            // Карточка с текущим остатком
-            _buildInfoCard(
-              context,
-              title: 'Остаток',
-              content: '$currentStock шт.',
-              icon: Icons.inventory_2_outlined,
-            ),
-
-            // Карточка с расчётом ориентировочного времени
-            _buildInfoCard(
-              context,
-              title: 'Ориентировочно хватит',
-              content: '$stockCoverageDays ${_pluralizeDay(stockCoverageDays)}',
-              icon: Icons.access_time_outlined,
-            ),
-
-            // Карточка с приоритетом
-            _buildInfoCard(
-              context,
-              title: 'Приоритет',
-              content: priority,
-              icon: Icons.priority_high_outlined,
-            ),
-
-            // Карточка поставщиков с ценами
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Цены',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          color: AppColors.secondary,
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5)),
-                          child: Text('1'),
-                        )
-                      ],
-                    )
-                  ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Название товара
+              Text(
+                widget.productName,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            )
-          ],
+              const SizedBox(height: 16),
+
+              // Карточка с данными склада
+              _buildInfoCard(
+                context,
+                title: 'Склад',
+                content: widget.warehouse,
+                icon: Icons.warehouse_outlined,
+              ),
+
+              // Карточка с данными по продажам
+              _buildInfoCard(
+                context,
+                title: 'Продажи',
+                content:
+                    '7 дней: ${widget.salesLast7Days}\n30 дней: ${widget.salesLast30Days}\n180 дней: ${widget.salesLast180Days}',
+                icon: Icons.bar_chart_outlined,
+              ),
+
+              // Карточка с текущим остатком
+              _buildInfoCard(
+                context,
+                title: 'Остаток',
+                content: '${widget.currentStock} шт.',
+                icon: Icons.inventory_2_outlined,
+              ),
+
+              // Карточка с расчётом ориентировочного времени
+              _buildInfoCard(
+                context,
+                title: 'Ориентировочно хватит',
+                content:
+                    '${widget.stockCoverageDays} ${_pluralizeDay(widget.stockCoverageDays)}',
+                icon: Icons.access_time_outlined,
+              ),
+
+              // Карточка с приоритетом
+              _buildInfoCard(
+                context,
+                title: 'Приоритет',
+                content: widget.priority,
+                icon: Icons.priority_high_outlined,
+              ),
+
+              // Карточка поставщиков с ценами
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.assessment_outlined,
+                            color: Theme.of(context)
+                                .iconTheme
+                                .color, // ✅ Устанавливаем цвет
+                            size: 35,
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            'Цены от поставщиков',
+                            style: Theme.of(context).textTheme.headlineMedium,
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      // ✅ Если данные загружаются — показываем скелетоны
+                      if (!dataIsLoaded)
+                        Column(
+                          children:
+                              List.generate(3, (index) => _buildSkeletonTile()),
+                        )
+                      // ✅ Если данные загружены, но их нет — показываем текст "Нет данных"
+                      else if (supplierPrices.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Text(
+                              'Нет данных о ценах',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                      // ✅ Если данные есть — отображаем их
+                      else
+                        ...supplierPrices.map((priceData) {
+                          return _buildSupplierTile(priceData.supplier.name,
+                              priceData.price, priceData.priceForDate);
+                        }),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -156,6 +242,50 @@ class ProductDetailsScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ✅ Используем твой SkeletonLoader для списка
+  Widget _buildSkeletonTile() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          SkeletonLoader(
+              width: 30,
+              height: 30,
+              borderRadius: BorderRadius.circular(15)), // Кружок для иконки
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SkeletonLoader(
+                    width: double.infinity,
+                    height: 16), // Линия для имени поставщика
+                const SizedBox(height: 6),
+                SkeletonLoader(width: 100, height: 14), // Линия для цены
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ✅ Обычный элемент списка поставщиков
+  Widget _buildSupplierTile(
+      String supplierName, double price, DateTime priceForDate) {
+    return ListTile(
+      contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+      title: Text(
+        supplierName,
+        style: Theme.of(context).textTheme.headlineSmall,
+      ),
+      subtitle: Text(
+        'Стоимость на дату: ${DateFormat('dd.MM.yyyy').format(priceForDate)}\nЦена: $price руб.',
+        style: Theme.of(context).textTheme.bodySmall,
       ),
     );
   }

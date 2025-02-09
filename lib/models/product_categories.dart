@@ -1,8 +1,8 @@
 class ProductCategories {
-  final int? id;
+  final int id;
   final String name;
 
-  ProductCategories({this.id, required this.name});
+  ProductCategories({required this.id, required this.name});
 
   factory ProductCategories.fromJson(Map<String, dynamic> json) {
     return ProductCategories(

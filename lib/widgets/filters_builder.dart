@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:tabakroom_staff/widgets/custom_elevated_button.dart';
 
@@ -26,37 +27,57 @@ class _FilterBuilderState extends State<FiltersBuilder> {
   /// Сохраняем начальные значения фильтров
   void _saveInitialValues() {
     initialValues = {
-      for (var filter in widget.data) filter.label: filter.currentValue
+      for (var filter in widget.data)
+        filter.label: List.from(filter.currentValues)
     };
   }
 
   /// Проверяем, изменились ли фильтры по сравнению с начальными значениями
   void _checkForChanges() {
-    setState(() {
-      hasChanges = widget.data.any((filter) =>
-          filter.currentValue !=
-          initialValues[filter.label]); // Сравнение значений
-    });
+    final newHasChanges = widget.data.any(
+      (filter) => !const DeepCollectionEquality().equals(
+        filter.currentValues,
+        initialValues[filter.label] ?? [],
+      ),
+    );
+    if (hasChanges != newHasChanges) {
+      setState(() {
+        hasChanges = newHasChanges;
+      });
+    }
   }
 
-  /// Метод для сброса всех фильтров
   void _resetFilters() {
     setState(() {
       for (var filter in widget.data) {
-        // Устанавливаем значение фильтра в null (или любое значение по умолчанию)
-        filter.updateValue(null);
+        if (filter.isMultiSelect) {
+          filter.updateValues([]);
+        } else {
+          filter.updateValue(null);
+        }
       }
+      _checkForChanges();
     });
   }
 
   void _handleApply() async {
-    await widget.onApply(); // Дожидаемся завершения функции
+    setState(() {
+      for (var filter in widget.data) {
+        filter.saveValues([...filter.currentValues]);
+      }
+    });
+
+    await widget.onApply();
     Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    if (widget.data.isEmpty) {
+      return Center(child: Text("Нет доступных фильтров"));
+    }
 
     return Padding(
         padding: const EdgeInsets.fromLTRB(15, 5, 15, 0),
@@ -95,12 +116,14 @@ class _FilterBuilderState extends State<FiltersBuilder> {
                         children: elem.filterValues.map((option) {
                           final String optionLabel = option.label;
                           final dynamic optionValue = option.value;
+                          final bool isSelected =
+                              elem.currentValues.contains(optionValue);
 
-                          return ChoiceChip(
+                          return FilterChip(
                             label: Text(
                               optionLabel,
                               style: TextStyle(
-                                color: elem.currentValue == optionValue
+                                color: isSelected
                                     ? Colors.white
                                     : isDarkMode
                                         ? Colors.white70
@@ -108,14 +131,22 @@ class _FilterBuilderState extends State<FiltersBuilder> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            selected: elem.currentValue == optionValue,
+                            selected: isSelected,
                             onSelected: (bool selected) {
                               setState(() {
-                                if (elem.currentValue == optionValue) {
-                                  elem.updateValue(null); // Снимаем выбор
+                                if (elem.isMultiSelect) {
+                                  // ✅ Множественный выбор
+                                  if (isSelected) {
+                                    elem.updateValues([...elem.currentValues]
+                                      ..remove(optionValue));
+                                  } else {
+                                    elem.updateValues(
+                                        [...elem.currentValues, optionValue]);
+                                  }
                                 } else {
+                                  // ✅ Одиночный выбор
                                   elem.updateValue(
-                                      optionValue); // Устанавливаем новое значение
+                                      selected ? optionValue : null);
                                 }
                               });
                               _checkForChanges();
@@ -154,35 +185,37 @@ class _FilterBuilderState extends State<FiltersBuilder> {
   }
 }
 
-class FiltersData<T> {
+class FiltersData {
   final String label;
   final List<FilterValues> filterValues;
-  T? currentValue; // Убрали final, чтобы значение могло изменяться
-  final ValueChanged<T?> onValueChange;
+  final bool isMultiSelect;
+  List<dynamic> currentValues; // Динамические значения, но будем приводить к нужному типу
+  final ValueChanged<List<dynamic>> onValueChange;
 
   FiltersData({
     required this.label,
     required this.filterValues,
-    required this.currentValue,
+    required this.currentValues,
     required this.onValueChange,
+    this.isMultiSelect = false,
   });
 
-  /// Метод для обновления значения
-  void updateValue(T? newValue) {
-    currentValue = newValue; // Обновляем значение
-    onValueChange(newValue); // Уведомляем о изменении
+  void updateValues(List<dynamic> newValues) {
+    currentValues = List<dynamic>.from(newValues);
+  }
+
+  void updateValue(dynamic newValue) {
+    currentValues = newValue != null ? [newValue] : [];
+  }
+
+  void saveValues(List<dynamic> newValues) {
+    onValueChange(List<dynamic>.from(newValues));
   }
 }
 
-class FilterValues<T> {
-  //Значение которое пользователь увидит в интерфейсе
+class FilterValues {
   final String label;
-  //Значение выбранного фильтра
-  final T value;
-
-  /// Создаёт объект данных фильтра.
-  ///
-  /// - [label]: Название фильтра, отображается в интерфейсе.
-  /// - [value]: Значение выбранного фильтра
+  final dynamic value; // Делаем `value` динамичным, чтобы он мог быть любым
   FilterValues({required this.label, required this.value});
 }
+
