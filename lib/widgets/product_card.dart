@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tabakroom_staff/screens/product_details_screen.dart';
+import 'package:tabakroom_staff/themes/color_utils.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/widgets/skeleton.dart';
 import '../models/product_purchase_priority.dart';
@@ -24,21 +25,6 @@ class _ProductCardState extends State<ProductCard> {
     super.initState();
   }
 
-  Color _getPriorityColor(String priority, bool isDarkMode) {
-    switch (priority.toLowerCase()) {
-      case 'high':
-        return AppColors.danger;
-      case 'medium':
-        return AppColors.warning;
-      case 'low':
-        return AppColors.secondary;
-      default:
-        return isDarkMode
-            ? AppColors.defaultElementForDark
-            : AppColors.defaultElement;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (widget.isLoading || widget.productPriority == null) {
@@ -61,61 +47,53 @@ class _ProductCardState extends State<ProductCard> {
         ),
       );
     }
+
     // Если данные загружены, показываем ProductCard
-    return GestureDetector(
-      onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ProductDetailsScreen(
-                  productId: widget.productPriority!.product.id,
-                  productName: widget.productPriority!.product.name,
-                  warehouseId: widget.productPriority!.warehouse.id,
-                  warehouse: widget.productPriority!.warehouse.name,
-                  salesLast7Days: widget.productPriority!.totalSalesLast7Days,
-                  salesLast30Days: widget.productPriority!.totalSalesLast30Days,
-                  salesLast180Days:
-                      widget.productPriority!.totalSalesLast180Days,
-                  currentStock: widget.productPriority!.currentStock,
-                  stockCoverageDays: widget.productPriority!.stockCoverageDays,
-                  priority: widget.productPriority!.priorityLevel))),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.productPriority!.product.name,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _getPriorityColor(
-                            widget.productPriority!.priorityLevel,
-                            Theme.of(context).brightness == Brightness.dark),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+    return Card(
+        margin: EdgeInsets.fromLTRB(10, 5, 10, 5),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ProductDetailsScreen(
+                      dataScreen: widget.productPriority!))),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
                       child: Text(
-                        widget.productPriority!.priorityLevel.toUpperCase(),
-                        style: TextStyle(
-                            color: AppColors.textLight,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
-                      )),
-                ],
-              ),
-            ],
+                        widget.productPriority!.product.name,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: ColorUtils.getPriorityColor(
+                              widget.productPriority!.priorityLevel,
+                              Theme.of(context).brightness == Brightness.dark),
+                          borderRadius: BorderRadius.circular(1),
+                        ),
+                        child: Text(
+                          widget.productPriority!.priorityLevel.toUpperCase(),
+                          style: TextStyle(
+                              color: AppColors.textLight,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold),
+                        )),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }

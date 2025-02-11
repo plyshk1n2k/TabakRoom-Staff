@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tabakroom_staff/models/api_response.dart';
+import 'package:tabakroom_staff/models/product_purchase_priority.dart';
 import 'package:tabakroom_staff/models/top_supplier_price.dart';
 import 'package:tabakroom_staff/services/purchase_priority_service.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
@@ -8,30 +9,9 @@ import 'package:tabakroom_staff/widgets/custom_snakbar.dart';
 import 'package:tabakroom_staff/widgets/skeleton.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
-  final int productId;
-  final String productName;
-  final int warehouseId;
-  final String warehouse;
-  final int salesLast7Days;
-  final int salesLast30Days;
-  final int salesLast180Days;
-  final int currentStock;
-  final int stockCoverageDays;
-  final String priority;
+  final ProductPurchasePriority dataScreen;
 
-  const ProductDetailsScreen({
-    Key? key,
-    required this.productId,
-    required this.productName,
-    required this.warehouseId,
-    required this.warehouse,
-    required this.salesLast7Days,
-    required this.salesLast30Days,
-    required this.salesLast180Days,
-    required this.currentStock,
-    required this.stockCoverageDays,
-    required this.priority,
-  }) : super(key: key);
+  const ProductDetailsScreen({super.key, required this.dataScreen});
 
   @override
   _ProductDetailsScreenState createState() => _ProductDetailsScreenState();
@@ -54,8 +34,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     });
 
     final ApiResponse<List<TopSupplierPrice>> response =
-        await PurchasePriorityService.fetchTopPriceSupplier(widget.productId,
-            warehouseId: widget.warehouseId);
+        await PurchasePriorityService.fetchTopPriceSupplier(
+            widget.dataScreen.product.id,
+            warehouseId: widget.dataScreen.warehouse.id);
 
     setState(() {
       if (response.isSuccess && response.data != null) {
@@ -102,7 +83,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             children: [
               // Название товара
               Text(
-                widget.productName,
+                widget.dataScreen.product.name,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -114,7 +95,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               _buildInfoCard(
                 context,
                 title: 'Склад',
-                content: widget.warehouse,
+                content: widget.dataScreen.warehouse.name,
                 icon: Icons.warehouse_outlined,
               ),
 
@@ -123,7 +104,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 context,
                 title: 'Продажи',
                 content:
-                    '7 дней: ${widget.salesLast7Days}\n30 дней: ${widget.salesLast30Days}\n180 дней: ${widget.salesLast180Days}',
+                    '7 дней: ${widget.dataScreen.totalSalesLast7Days}\n30 дней: ${widget.dataScreen.totalSalesLast30Days}\n180 дней: ${widget.dataScreen.totalSalesLast180Days}',
                 icon: Icons.bar_chart_outlined,
               ),
 
@@ -131,7 +112,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               _buildInfoCard(
                 context,
                 title: 'Остаток',
-                content: '${widget.currentStock} шт.',
+                content: '${widget.dataScreen.currentStock} шт.',
                 icon: Icons.inventory_2_outlined,
               ),
 
@@ -140,7 +121,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 context,
                 title: 'Ориентировочно хватит',
                 content:
-                    '${widget.stockCoverageDays} ${_pluralizeDay(widget.stockCoverageDays)}',
+                    '${widget.dataScreen.stockCoverageDays} ${_pluralizeDay(widget.dataScreen.stockCoverageDays)}',
                 icon: Icons.access_time_outlined,
               ),
 
@@ -148,7 +129,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               _buildInfoCard(
                 context,
                 title: 'Приоритет',
-                content: widget.priority,
+                content: widget.dataScreen.priorityLevel,
                 icon: Icons.priority_high_outlined,
               ),
 

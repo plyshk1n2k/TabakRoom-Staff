@@ -4,14 +4,15 @@ import 'package:tabakroom_staff/models/api_response.dart';
 import 'package:tabakroom_staff/models/product_categories.dart';
 import 'package:tabakroom_staff/models/product_purchase_priority.dart';
 import 'package:tabakroom_staff/models/warehouse.dart';
+import 'package:tabakroom_staff/screens/order_recommendation_screen.dart';
 import 'package:tabakroom_staff/services/purchase_priority_service.dart';
+import 'package:tabakroom_staff/themes/color_utils.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/widgets/bottom_sheet.dart';
+import 'package:tabakroom_staff/widgets/custom_elevated_button.dart';
 import 'package:tabakroom_staff/widgets/custom_snakbar.dart';
 import 'package:tabakroom_staff/widgets/filters_builder.dart';
 import 'package:tabakroom_staff/widgets/multi_select_list.dart';
-import 'package:tabakroom_staff/widgets/product_card.dart'; // Убедись, что MenuCard импортирован
-
 class CreateOrderScreen extends StatefulWidget {
   const CreateOrderScreen({super.key});
 
@@ -169,72 +170,134 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-              onPressed: () => showFilters(),
+            onPressed: () => showFilters(),
+            icon: Icon(
+              Icons.tune,
+              color: Theme.of(context).iconTheme.color,
+            ),
+          ),
+          PopupMenuButton<String>(
+              position: PopupMenuPosition.under,
               icon: Icon(
-                Icons.tune,
+                Icons.more_vert,
                 color: Theme.of(context).iconTheme.color,
-              ))
+              ), // Три точки
+              onSelected: (value) {
+                if (value == "selected_all") {
+                  _multiSelectController.selectAll();
+                } else if (value == "decline_select") {
+                  _multiSelectController.deselectAll();
+                }
+              },
+              itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: "selected_all",
+                      child: ListTile(
+                        visualDensity: VisualDensity(
+                            horizontal: -4, vertical: -4), // Уменьшаем отступы
+
+                        leading: Icon(
+                          Icons.check_box,
+                          color: AppColors.secondary,
+                        ),
+                        title: Text(
+                          'Выбрать все',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: "decline_select",
+                      child: ListTile(
+                        visualDensity:
+                            VisualDensity(horizontal: -4, vertical: -4),
+                        leading: Icon(
+                          Icons.clear,
+                          color: AppColors.danger,
+                        ),
+                        title: Text(
+                          'Отменить выбор',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                      ),
+                    ),
+                  ])
         ],
       ),
-      body: RefreshIndicator.adaptive(
-          onRefresh: () async {
-            loadProducts();
-          },
-          child: dataIsLoaded
-              ? data.isEmpty
-                  ? Center(
-                      child: Text('Данные отсутствуют'),
-                    )
-                  : Column(
-                      children: [
-                        Expanded(
-                          child: MultiSelectList<ProductPurchasePriority>(
-                            controller: _multiSelectController,
-                            items: data,
-                            itemLabel: (item) => item.product.name,
-                            onSelectionChanged: _onSelectionChanged,
-                          ),
-                        ),
-                      ],
-                    )
-              : ListView.builder(
-                  itemCount: 8, // Скелетонов будет 5
-                  padding: const EdgeInsets.all(16.0),
-                  itemBuilder: (context, index) {
-                    return const ProductCard(
-                        productPriority: null, isLoading: true);
-                  },
-                )),
-      floatingActionButton: SpeedDial(
-        animatedIcon: AnimatedIcons.menu_close,
-        backgroundColor: AppColors.primary,
-        overlayColor: Colors.black54, // Затемнение фона при открытии
-        overlayOpacity: 0.3,
-        spacing: 15, // Расстояние между кнопками
-        spaceBetweenChildren: 5, // Отступ между кнопками
-        buttonSize:
-            const Size(50, 50), // Размер главной кнопки (по умолчанию 56x56)
-        childrenButtonSize: const Size(46, 46), // Размер вложенных кнопок
-
+      body: Stack(
         children: [
-          SpeedDialChild(
-            child: Icon(Icons.check, color: Colors.white),
-            label: "Выбрать все",
-            backgroundColor: AppColors.secondary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8), // Закругленные углы
-            ),
-            onTap: () => _multiSelectController.selectAll(),
-          ),
-          SpeedDialChild(
-            child: Icon(Icons.clear, color: Colors.white),
-            label: "Отменить выбор",
-            backgroundColor: AppColors.danger,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8), // Закругленные углы
-            ),
-            onTap: () => _multiSelectController.deselectAll(),
-          ),
+          // Основной контент
+          RefreshIndicator.adaptive(
+              onRefresh: () async {
+                loadProducts();
+              },
+              child: dataIsLoaded
+                  ? data.isEmpty
+                      ? Center(
+                          child: Text('Данные отсутствуют'),
+                        )
+                      : Column(
+                          children: [
+                            Expanded(
+                              child: MultiSelectList<ProductPurchasePriority>(
+                                controller: _multiSelectController,
+                                items: data,
+                                itemLabel: (item) => item.product.name,
+                                trailingWidget: (item) {
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: ColorUtils.getPriorityColor(
+                                          item.priorityLevel,
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark),
+                                      borderRadius: BorderRadius.circular(1),
+                                    ),
+                                    child: Text(
+                                      item.priorityLevel.toUpperCase(),
+                                      style: TextStyle(
+                                        color: AppColors.textLight,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                onSelectionChanged: _onSelectionChanged,
+                              ),
+                            ),
+                            SizedBox(height: 70), // Отступ для кнопки
+                          ],
+                        )
+                  : Center(
+                      child: CircularProgressIndicator(
+                      backgroundColor: AppColors.defaultElement,
+                      color: AppColors.primary,
+                    ))),
+
+          // Кнопка подтверждения
+          Positioned(
+              bottom: 16,
+              left: 16,
+              right: 16,
+              child: CustomElevatedButton(
+                  onPressed: _selectedProducts.isNotEmpty
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => OrderRecommendationScreen(
+                                selectedProductIds: _selectedProducts
+                                    .map((elem) => elem.product.id)
+                                    .toList(),
+                              ),
+                            ),
+                          );
+                        }
+                      : null,
+                  text: "Подтвердить (${_selectedProducts.length})",
+                  buttonType: ButtonType.primary)),
         ],
       ),
     );

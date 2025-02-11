@@ -81,6 +81,13 @@ class CustomTheme {
         borderRadius: BorderRadius.circular(12),
       ),
     ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: AppColors.backgroundLight,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15), // Радиус скругления углов
+        side: BorderSide(color: AppColors.defaultElement), // Лёгкая граница
+      ),
+    ),
     checkboxTheme: CheckboxThemeData(
       checkColor:
           WidgetStateProperty.all(AppColors.backgroundLight), // Белая галочка
@@ -92,12 +99,44 @@ class CustomTheme {
       }),
       side: BorderSide(color: AppColors.backgroundDark, width: 2),
     ),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.primary; // ✅ Цвет выделенной секции
+          }
+          return AppColors.backgroundLight; // ✅ Цвет невыбранных секций
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.textLight; // ✅ Цвет текста в активной секции
+          }
+          return AppColors.textDark; // ✅ Цвет текста в неактивных секциях
+        }),
+        side: WidgetStateProperty.resolveWith<BorderSide>((states) {
+          return BorderSide(
+              color: AppColors.backgroundDark,
+              width: 1.0); // ✅ Граница активной кнопки
+        }),
+        padding: WidgetStateProperty.all(
+          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+        ),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5), // ✅ Закругляем кнопки
+          ),
+        ),
+        textStyle: WidgetStateProperty.all(
+          TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        ),
+      ),
+    ),
     cardTheme: CardTheme(
       color: AppColors.backgroundLight,
       elevation: 5, // Высота тени
       shadowColor: AppColors.defaultElement,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15), // Радиус скругления углов
+        borderRadius: BorderRadius.circular(8),
         side: BorderSide(color: AppColors.defaultElement), // Лёгкая граница
       ),
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -223,7 +262,7 @@ class CustomTheme {
       scaffoldBackgroundColor: AppColors.backgroundDark,
       appBarTheme: const AppBarTheme(
           backgroundColor:
-              AppColors.backgroundDark, // Цвет фона для всех AppBar
+              AppColors.backgroundDark2, // Цвет фона для всех AppBar
           titleTextStyle: TextStyle(
               color: AppColors.textLight, // Цвет текста для всех AppBar
               fontSize: 20,
@@ -249,6 +288,14 @@ class CustomTheme {
         bodyMedium: TextStyle(color: AppColors.textLight, fontSize: 16),
         bodySmall: TextStyle(color: AppColors.textLight, fontSize: 14),
       ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: AppColors.backgroundDark2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15), // Радиус скругления углов
+          side: BorderSide(
+              color: AppColors.defaultElementForDark), // Лёгкая граница
+        ),
+      ),
       checkboxTheme: CheckboxThemeData(
         checkColor:
             WidgetStateProperty.all(AppColors.backgroundLight), // Белая галочка
@@ -260,6 +307,38 @@ class CustomTheme {
         }),
 
         side: BorderSide(color: AppColors.backgroundLight, width: 2),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AppColors.primary; // ✅ Цвет выделенной секции
+            }
+            return AppColors.backgroundDark2; // ✅ Цвет невыбранных секций
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AppColors.textLight; // ✅ Цвет текста в активной секции
+            }
+            return AppColors.textLight; // ✅ Цвет текста в неактивных секциях
+          }),
+          side: WidgetStateProperty.resolveWith<BorderSide>((states) {
+            return BorderSide(
+                color: AppColors.backgroundDark,
+                width: 1.0); // ✅ Граница активной кнопки
+          }),
+          padding: WidgetStateProperty.all(
+            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+          ),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5), // ✅ Закругляем кнопки
+            ),
+          ),
+          textStyle: WidgetStateProperty.all(
+            TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          ),
+        ),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.defaultElementForDark,

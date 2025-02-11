@@ -7,7 +7,6 @@ import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/widgets/bottom_sheet.dart';
 import 'package:tabakroom_staff/widgets/custom_snakbar.dart';
 import 'package:tabakroom_staff/widgets/filters_builder.dart';
-import 'package:tabakroom_staff/widgets/skeleton.dart';
 
 class SuspiciousTransactionsScreen extends StatefulWidget {
   const SuspiciousTransactionsScreen({super.key});
@@ -164,36 +163,10 @@ class _SuspiciousTransactionsScreenState
                           );
                         },
                       )
-                : ListView.builder(
-                    itemCount: 8, // Скелетонов будет 5
-                    padding: const EdgeInsets.all(16.0),
-                    itemBuilder: (context, index) {
-                      return Card(
-                          child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            SkeletonLoader(
-                              width: 40,
-                              height: 40,
-                            ),
-                            SizedBox(
-                              width: 30,
-                            ),
-                            Flexible(
-                                child: Column(
-                              children: [
-                                SkeletonLoader(),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                SkeletonLoader()
-                              ],
-                            ))
-                          ],
-                        ),
-                      ));
-                    },
-                  )));
+                : Center(
+                    child: CircularProgressIndicator(
+                    backgroundColor: AppColors.defaultElement,
+                    color: AppColors.primary,
+                  ))));
   }
 }

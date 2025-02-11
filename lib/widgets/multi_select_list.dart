@@ -25,6 +25,7 @@ class MultiSelectController<T> extends ChangeNotifier {
 class MultiSelectList<T> extends StatefulWidget {
   final List<T> items;
   final String Function(T) itemLabel;
+  final Widget Function(T)? trailingWidget;
   final Function(List<T>) onSelectionChanged;
   final MultiSelectController<T> controller; // Контроллер
 
@@ -34,6 +35,7 @@ class MultiSelectList<T> extends StatefulWidget {
     required this.itemLabel,
     required this.onSelectionChanged,
     required this.controller,
+    this.trailingWidget,
   }) : super(key: key);
 
   @override
@@ -70,6 +72,7 @@ class _MultiSelectListState<T> extends State<MultiSelectList<T>> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
       itemCount: widget.items.length,
       itemBuilder: (context, index) {
         final item = widget.items[index];
@@ -77,31 +80,26 @@ class _MultiSelectListState<T> extends State<MultiSelectList<T>> {
 
         return Card(
           margin: EdgeInsets.fromLTRB(10, 5, 10, 5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           child: InkWell(
             borderRadius: BorderRadius.circular(8),
             onTap: () => _toggleSelection(item),
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 7, horizontal: 7),
-              child: Row(
-                children: [
-                  Checkbox(
+                padding: EdgeInsets.symmetric(vertical: 5, horizontal: 0),
+                child: ListTile(
+                  leading: Checkbox(
                     value: isSelected,
                     onChanged: (value) => _toggleSelection(item),
                   ),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(0, 0, 5, 0),
-                      child: Text(
-                        widget.itemLabel(item),
-                        style: Theme.of(context).textTheme.headlineSmall,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
+                  title: Text(
+                    widget.itemLabel(item),
+                    maxLines: 2,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
-              ),
-            ),
+                  trailing: widget.trailingWidget != null
+                      ? widget.trailingWidget!(item)
+                      : null, // ✅ Исправленная проверка
+                )),
           ),
         );
       },

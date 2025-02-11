@@ -181,20 +181,17 @@ class _LowStockScreenState extends State<LowStockScreen> {
                       )
                     : ListView.builder(
                         itemCount: data.length,
-                        padding: const EdgeInsets.all(16.0),
+                        padding: EdgeInsets.fromLTRB(0, 5, 0, 10),
                         itemBuilder: (context, index) {
                           final item = data[index];
                           return ProductCard(
                               productPriority: item, isLoading: false);
                         },
                       )
-                : ListView.builder(
-                    itemCount: 8, // Скелетонов будет 5
-                    padding: const EdgeInsets.all(16.0),
-                    itemBuilder: (context, index) {
-                      return const ProductCard(
-                          productPriority: null, isLoading: true);
-                    },
-                  )));
+                : Center(
+                    child: CircularProgressIndicator(
+                    backgroundColor: AppColors.defaultElement,
+                    color: AppColors.primary,
+                  ))));
   }
 }
