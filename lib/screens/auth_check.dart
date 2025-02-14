@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:tabakroom_staff/services/app_preferences.dart';
+import 'package:tabakroom_staff/screens/home_screen.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/services/auth_service.dart';
 import 'login_screen.dart';
-import 'home_screen.dart';
 
 class AuthCheck extends StatefulWidget {
   const AuthCheck({super.key});
@@ -20,7 +19,7 @@ class _AuthCheckState extends State<AuthCheck> {
   void initState() {
     super.initState();
     // AppPreferences.clear();
-    //AuthService.logout();
+    // AuthService.logout();
     _checkAuth();
   }
 

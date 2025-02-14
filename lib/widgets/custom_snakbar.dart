@@ -47,7 +47,6 @@ class _SnackbarContent extends StatefulWidget {
   final VoidCallback onClose;
 
   const _SnackbarContent({
-    super.key,
     required this.message,
     required this.type,
     required this.position,

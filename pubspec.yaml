@@ -24,6 +24,9 @@ dependencies:
   shimmer: ^3.0.0
   flutter_speed_dial: ^7.0.0
   collection: ^1.17.0
+  local_auth: ^2.1.6 # 📌 Для Face ID / Touch ID
+  pin_code_fields: ^8.0.1 # 📌 Для ввода PIN-кода
+  flutter_app_lock: ^4.2.0+2
 
 dev_dependencies:
   flutter_test:

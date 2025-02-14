@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:tabakroom_staff/models/api_response.dart';
 import 'package:tabakroom_staff/screens/home_screen.dart';
+import 'package:tabakroom_staff/services/app_preferences.dart';
 import 'package:tabakroom_staff/themes/theme_data.dart';
 import 'package:tabakroom_staff/services/auth_service.dart';
 import 'package:tabakroom_staff/widgets/custom_elevated_button.dart';
@@ -43,6 +45,13 @@ class _LoginScreenState extends State<LoginScreen> {
           type: WidgetType.success,
           position: SnackbarPosition.top);
 
+      final savedPin = await AppPreferences.getValue<String>('user_pin');
+
+      if (savedPin == null) {
+        // Если PIN-кода нет, открываем `PinScreen`
+        AppLock.of(context)?.showLockScreen(); // 🔹 Разблокируем приложение
+      }
+      // Если PIN-код уже есть, используем MaterialPageRoute
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -59,6 +68,8 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor:
+            _isDarkMode ? AppColors.backgroundDark : AppColors.backgroundLight,
         title: const Text('Авторизация'),
         centerTitle: true,
       ),

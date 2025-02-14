@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:tabakroom_staff/models/api_response.dart';
 import 'package:tabakroom_staff/models/product_categories.dart';
 import 'package:tabakroom_staff/models/product_purchase_priority.dart';

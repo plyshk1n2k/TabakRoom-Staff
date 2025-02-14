@@ -5,6 +5,7 @@ import 'package:tabakroom_staff/services/app_preferences.dart';
 class AuthService {
   static const _tokenKey = 'access_token';
   static const _refreshTokenKey = 'refresh_token';
+  static const _userPin = 'user_pin';
   static bool isBlocked = false; // Статус блокировки
 
   /// Проверка, авторизован ли пользователь
@@ -34,6 +35,7 @@ class AuthService {
   static Future<void> logout() async {
     await AppPreferences.remove(_tokenKey);
     await AppPreferences.remove(_refreshTokenKey);
+    await AppPreferences.remove(_userPin);
   }
 
   /// Авторизация пользователя

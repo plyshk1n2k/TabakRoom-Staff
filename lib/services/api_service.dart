@@ -101,7 +101,7 @@ class ApiService {
 
       return _handleResponse<T>(response);
     } on SocketException {
-      return ApiResponse.error("Нет подключения к интернету");
+      return ApiResponse.error("Сервер не отвечает");
     } on TimeoutException {
       return ApiResponse.error("Превышено время ожидания запроса");
     } catch (e) {
